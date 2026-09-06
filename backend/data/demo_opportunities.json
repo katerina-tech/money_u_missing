@@ -1,0 +1,510 @@
+{
+  "generated_at": "2026-09-04T14:20:32.164196+00:00",
+  "note": "FICTIONAL DATA. Every organisation named here is invented and marked as such. Every record is loaded with is_demo=true and can never claim verified compensation. Do not treat any of these as a real offer.",
+  "opportunities": [
+    {
+      "id": "demo-expert-network-ai",
+      "title": "Paid expert calls - data & AI practitioners",
+      "organization": "Northlight Expert Circle (fictional)",
+      "category": "EXPERT_CALL",
+      "subcategory": "Expert network",
+      "description": "A fictional expert network that matches practitioners with investors and strategy teams for one-hour paid consultations. Applicants complete a profile and are contacted when a project matches their background. Engagements are ad hoc, remote, and typically one to two hours.",
+      "country": "DE",
+      "city": null,
+      "remote_type": "REMOTE",
+      "required_skills": [
+        "Data Engineering",
+        "Machine Learning"
+      ],
+      "preferred_skills": [
+        "Cloud Architecture",
+        "MLOps"
+      ],
+      "required_languages": [
+        {
+          "code": "en",
+          "minimum": "B2",
+          "strength": "HARD"
+        }
+      ],
+      "experience_min_years": 5,
+      "employment_type": "FREELANCE",
+      "compensation_min_minor": 12000,
+      "compensation_max_minor": 25000,
+      "compensation_basis": "PER_HOUR",
+      "compensation_period": "IRREGULAR",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": 1,
+      "estimated_hours_max": 3,
+      "deadline": null,
+      "eligibility_text": "Open to practitioners with at least five years of hands-on experience.",
+      "eligibility_structured": [
+        {
+          "label": "At least 5 years professional experience",
+          "strength": "HARD"
+        },
+        {
+          "label": "Based in the EU",
+          "strength": "SOFT"
+        }
+      ],
+      "source_url": "https://example.invalid/demo/expert-network",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-consulting-data-platform",
+      "title": "Freelance data platform review - 3 week engagement",
+      "organization": "Hansa Logistik Werke (fictional)",
+      "category": "CONSULTING",
+      "description": "A fictional mid-sized logistics company looking for an external review of its data platform before a migration. Part-time engagement alongside an existing job is explicitly acceptable. Remote with one on-site workshop.",
+      "country": "DE",
+      "city": "Hamburg",
+      "remote_type": "HYBRID",
+      "required_skills": [
+        "Data Engineering",
+        "SQL",
+        "Cloud Architecture"
+      ],
+      "preferred_skills": [
+        "dbt",
+        "Airflow"
+      ],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "B2",
+          "strength": "SOFT"
+        },
+        {
+          "code": "en",
+          "minimum": "B2",
+          "strength": "HARD"
+        }
+      ],
+      "experience_min_years": 4,
+      "employment_type": "FREELANCE",
+      "compensation_min_minor": 85000,
+      "compensation_max_minor": 110000,
+      "compensation_basis": "PER_DAY",
+      "compensation_period": "ONE_TIME",
+      "tax_treatment": "GROSS",
+      "estimated_hours_min": 8,
+      "estimated_hours_max": 12,
+      "deadline": "2026-09-25",
+      "eligibility_structured": [
+        {
+          "label": "Able to invoice as a freelancer in Germany",
+          "strength": "HARD"
+        }
+      ],
+      "source_url": "https://example.invalid/demo/consulting-data-platform",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-lehrauftrag-hochschule",
+      "title": "Lehrauftrag: Datenanalyse (Bachelor, 2 SWS)",
+      "organization": "Hochschule Nordwest (fictional)",
+      "category": "TEACHING",
+      "description": "A fictional university of applied sciences seeking a practitioner to teach a two-hours-per-week module in the winter semester. Evening slot, suited to someone in full-time employment. Honorar paid per Semesterwochenstunde.",
+      "country": "DE",
+      "city": "Bremen",
+      "remote_type": "HYBRID",
+      "required_skills": [
+        "Data Analysis",
+        "Statistics",
+        "Teaching"
+      ],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "C1",
+          "strength": "HARD"
+        }
+      ],
+      "experience_min_years": 3,
+      "employment_type": "FREELANCE",
+      "compensation_min_minor": 180000,
+      "compensation_max_minor": 240000,
+      "compensation_basis": "TOTAL",
+      "compensation_period": "ONE_TIME",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": 4,
+      "estimated_hours_max": 6,
+      "deadline": "2026-10-08",
+      "eligibility_text": "Ein abgeschlossenes Hochschulstudium ist Voraussetzung.",
+      "eligibility_structured": [
+        {
+          "label": "Completed university degree",
+          "strength": "HARD"
+        },
+        {
+          "label": "German at C1",
+          "strength": "HARD"
+        }
+      ],
+      "source_url": "https://example.invalid/demo/lehrauftrag",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-workshop-facilitation",
+      "title": "Paid workshop facilitator - AI literacy for public sector teams",
+      "organization": "Civic Skills Werkstatt (fictional)",
+      "category": "WORKSHOP",
+      "description": "A fictional training provider running one-day workshops for municipal administrations. Facilitators are paid per workshop day and use provided materials. Two to four days per quarter.",
+      "country": "DE",
+      "city": "Berlin",
+      "remote_type": "ONSITE",
+      "required_skills": [
+        "Workshop Facilitation",
+        "AI Engineering",
+        "Teaching"
+      ],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "C1",
+          "strength": "HARD"
+        }
+      ],
+      "employment_type": "FREELANCE",
+      "compensation_min_minor": 70000,
+      "compensation_max_minor": 90000,
+      "compensation_basis": "PER_DAY",
+      "compensation_period": "IRREGULAR",
+      "tax_treatment": "GROSS",
+      "estimated_hours_min": 8,
+      "estimated_hours_max": 8,
+      "deadline": null,
+      "source_url": "https://example.invalid/demo/workshop-facilitator",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-paid-research-panel",
+      "title": "Paid research interviews - developer tooling study",
+      "organization": "Steinweg Research Collective (fictional)",
+      "category": "PAID_RESEARCH",
+      "description": "A fictional research agency recruiting software practitioners for 60-minute remote interviews about developer tooling. One session per participant. Compensation paid within 14 days of the session.",
+      "country": "DE",
+      "remote_type": "REMOTE",
+      "required_skills": [
+        "Software Engineering"
+      ],
+      "required_languages": [
+        {
+          "code": "en",
+          "minimum": "B2",
+          "strength": "HARD"
+        }
+      ],
+      "employment_type": "FREELANCE",
+      "compensation_min_minor": 15000,
+      "compensation_max_minor": 15000,
+      "compensation_basis": "PER_ENGAGEMENT",
+      "compensation_period": "ONE_TIME",
+      "tax_treatment": "GROSS",
+      "estimated_hours_min": 1,
+      "estimated_hours_max": 1,
+      "deadline": "2026-09-16",
+      "source_url": "https://example.invalid/demo/research-panel",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-mentoring-programme",
+      "title": "Paid mentor - early-career data professionals",
+      "organization": "Bruecke Mentoring Programme (fictional)",
+      "category": "MENTORING",
+      "description": "A fictional non-profit running a structured six-month mentoring programme. Mentors commit to two hours per month and receive an expense allowance. The page does not state whether the allowance is taxable.",
+      "country": "DE",
+      "remote_type": "REMOTE",
+      "required_skills": [
+        "Mentoring",
+        "Data Science"
+      ],
+      "experience_min_years": 5,
+      "employment_type": "UNKNOWN",
+      "compensation_min_minor": 8000,
+      "compensation_max_minor": 8000,
+      "compensation_basis": "PER_MONTH",
+      "compensation_period": "RECURRING",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": 2,
+      "estimated_hours_max": 2,
+      "deadline": "2026-10-19",
+      "source_url": "https://example.invalid/demo/mentoring",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-founder-programme",
+      "title": "Part-time founder programme - technical founders, cohort 7",
+      "organization": "Ostwind Founder Lab (fictional)",
+      "category": "FOUNDER_PROGRAM",
+      "description": "A fictional twelve-week evening programme for people building a technical product alongside employment. Includes a stipend; the amount is not published on the listing.",
+      "country": "DE",
+      "city": "Leipzig",
+      "remote_type": "HYBRID",
+      "required_skills": [
+        "Software Engineering",
+        "Product Management"
+      ],
+      "employment_type": "STIPEND",
+      "compensation_min_minor": null,
+      "compensation_max_minor": null,
+      "compensation_basis": "UNKNOWN",
+      "compensation_period": "UNKNOWN",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": 6,
+      "estimated_hours_max": 10,
+      "deadline": "2026-10-02",
+      "eligibility_text": "Open to residents of Germany. A co-founder is not required.",
+      "eligibility_structured": [
+        {
+          "label": "Resident in Germany",
+          "strength": "HARD"
+        },
+        {
+          "label": "Working prototype",
+          "strength": "SOFT"
+        }
+      ],
+      "source_url": "https://example.invalid/demo/founder-lab",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-innovation-grant",
+      "title": "Regional innovation grant - digital tools for small business",
+      "organization": "Landesagentur Mittelstand Nord (fictional)",
+      "category": "GRANT",
+      "description": "A fictional regional grant for individuals and micro-businesses developing digital tools. Applications require a project description and a budget outline. Grant size is stated as a range.",
+      "country": "DE",
+      "region": "Niedersachsen",
+      "remote_type": "REMOTE",
+      "required_skills": [
+        "Software Engineering"
+      ],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "B2",
+          "strength": "HARD"
+        }
+      ],
+      "employment_type": "GRANT_FUNDED",
+      "compensation_min_minor": 800000,
+      "compensation_max_minor": 2500000,
+      "compensation_basis": "TOTAL",
+      "compensation_period": "ONE_TIME",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": null,
+      "estimated_hours_max": null,
+      "deadline": "2026-10-30",
+      "eligibility_text": "Antragsberechtigt sind natürliche Personen mit Wohnsitz in Niedersachsen sowie Kleinstunternehmen.",
+      "eligibility_structured": [
+        {
+          "label": "Residence in Niedersachsen",
+          "strength": "HARD"
+        },
+        {
+          "label": "Gewerbe or freelance registration",
+          "strength": "HARD"
+        }
+      ],
+      "source_url": "https://example.invalid/demo/innovation-grant",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-competition-prize",
+      "title": "Open data challenge - 3 prizes",
+      "organization": "Datenwende Challenge (fictional)",
+      "category": "COMPETITION",
+      "description": "A fictional open competition to build a tool using published municipal data. Individual entries permitted. Judged on usefulness and openness.",
+      "country": "DE",
+      "remote_type": "REMOTE",
+      "required_skills": [
+        "Python",
+        "Data Analysis"
+      ],
+      "employment_type": "PRIZE_BASED",
+      "compensation_min_minor": 200000,
+      "compensation_max_minor": 1000000,
+      "compensation_basis": "TOTAL",
+      "compensation_period": "ONE_TIME",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": 4,
+      "estimated_hours_max": 8,
+      "deadline": "2026-09-13",
+      "source_url": "https://example.invalid/demo/data-challenge",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-fellowship-public-interest",
+      "title": "Public-interest technology fellowship - part-time track",
+      "organization": "Gemeinwohl Fellowship (fictional)",
+      "category": "FELLOWSHIP",
+      "description": "A fictional six-month fellowship placing technologists with public-interest organisations. The part-time track is eight hours per week. The listing does not state the stipend.",
+      "country": "DE",
+      "remote_type": "REMOTE",
+      "required_skills": [
+        "Software Engineering",
+        "Data Protection"
+      ],
+      "preferred_skills": [
+        "GDPR"
+      ],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "B2",
+          "strength": "SOFT"
+        }
+      ],
+      "experience_min_years": 3,
+      "employment_type": "STIPEND",
+      "compensation_min_minor": null,
+      "compensation_max_minor": null,
+      "compensation_basis": "UNKNOWN",
+      "compensation_period": "UNKNOWN",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": 8,
+      "estimated_hours_max": 8,
+      "deadline": "2026-09-06",
+      "source_url": "https://example.invalid/demo/fellowship",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-part-time-analyst",
+      "title": "Part-time data analyst (16h/week)",
+      "organization": "Gruenspan Energie Genossenschaft (fictional)",
+      "category": "PART_TIME_JOB",
+      "description": "A fictional energy cooperative hiring a part-time analyst on a permanent employment contract. Fixed monthly salary, sixteen hours per week.",
+      "country": "DE",
+      "city": "Freiburg",
+      "remote_type": "HYBRID",
+      "required_skills": [
+        "SQL",
+        "Data Analysis",
+        "Python"
+      ],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "C1",
+          "strength": "HARD"
+        }
+      ],
+      "experience_min_years": 2,
+      "employment_type": "EMPLOYEE",
+      "compensation_min_minor": 190000,
+      "compensation_max_minor": 230000,
+      "compensation_basis": "PER_MONTH",
+      "compensation_period": "RECURRING",
+      "tax_treatment": "GROSS",
+      "estimated_hours_min": 16,
+      "estimated_hours_max": 16,
+      "deadline": "2026-10-14",
+      "source_url": "https://example.invalid/demo/part-time-analyst",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-advisory-board",
+      "title": "Technical advisory board member - climate tech",
+      "organization": "Wattfeld Ventures (fictional)",
+      "category": "ADVISORY",
+      "description": "A fictional early-stage company seeking a technical adviser for quarterly sessions. Compensation is described only as 'to be agreed'.",
+      "country": "DE",
+      "remote_type": "REMOTE",
+      "required_skills": [
+        "Cloud Architecture",
+        "Machine Learning"
+      ],
+      "experience_min_years": 8,
+      "employment_type": "UNKNOWN",
+      "compensation_min_minor": null,
+      "compensation_max_minor": null,
+      "compensation_basis": "UNKNOWN",
+      "compensation_period": "UNKNOWN",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": 2,
+      "estimated_hours_max": 4,
+      "deadline": null,
+      "source_url": "https://example.invalid/demo/advisory",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-speaking-conference",
+      "title": "Paid conference speaker - engineering practice track",
+      "organization": "Nordkonf (fictional)",
+      "category": "SPEAKING",
+      "description": "A fictional practitioner conference paying an honorarium plus travel for accepted talks. Call for proposals is open.",
+      "country": "DE",
+      "city": "Koeln",
+      "remote_type": "ONSITE",
+      "required_skills": [
+        "Public Speaking",
+        "Software Engineering"
+      ],
+      "required_languages": [
+        {
+          "code": "en",
+          "minimum": "B2",
+          "strength": "HARD"
+        }
+      ],
+      "employment_type": "FREELANCE",
+      "compensation_min_minor": 60000,
+      "compensation_max_minor": 60000,
+      "compensation_basis": "PER_ENGAGEMENT",
+      "compensation_period": "ONE_TIME",
+      "tax_treatment": "UNKNOWN",
+      "estimated_hours_min": 10,
+      "estimated_hours_max": 20,
+      "deadline": "2026-09-21",
+      "source_url": "https://example.invalid/demo/conference-cfp",
+      "is_demo": true,
+      "compensation_verified": false
+    },
+    {
+      "id": "demo-tutoring-statistics",
+      "title": "Online tutor - university statistics",
+      "organization": "Lernbruecke Tutoring (fictional)",
+      "category": "TUTORING",
+      "description": "A fictional tutoring platform matching tutors with university students. Hourly rate, flexible schedule, evenings and weekends.",
+      "country": "DE",
+      "remote_type": "REMOTE",
+      "required_skills": [
+        "Statistics",
+        "Teaching"
+      ],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "C1",
+          "strength": "HARD"
+        }
+      ],
+      "employment_type": "FREELANCE",
+      "compensation_min_minor": 2800,
+      "compensation_max_minor": 4000,
+      "compensation_basis": "PER_HOUR",
+      "compensation_period": "RECURRING",
+      "tax_treatment": "GROSS",
+      "estimated_hours_min": 2,
+      "estimated_hours_max": 8,
+      "deadline": null,
+      "source_url": "https://example.invalid/demo/tutoring",
+      "is_demo": true,
+      "compensation_verified": false
+    }
+  ]
+}

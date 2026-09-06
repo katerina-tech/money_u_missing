@@ -1,0 +1,115 @@
+[project]
+name = "money-youre-missing-backend"
+version = "0.1.0"
+description = "Money You're Missing - personal opportunity-to-income engine (API)"
+requires-python = ">=3.12,<3.15"
+
+# Core dependencies are exactly pinned and uv.lock is committed: a matching
+# engine whose behaviour is the product must not drift because a transitive
+# dependency shipped a minor release.
+#
+# Deliberately NOT core: psycopg/pgvector (Postgres is the production target
+# but SQLite is the zero-setup fallback) and fastembed (dense embeddings are an
+# opt-in upgrade over the always-available lexical retriever). Both live in
+# optional groups so `make dev`, `make test` and the demo need no wheels that
+# might not exist for the local interpreter.
+dependencies = [
+    "fastapi==0.141.1",
+    "uvicorn[standard]==0.52.4",
+    "pydantic[email]==2.13.5",
+    "pydantic-settings==2.15.0",
+    "sqlalchemy==2.0.52",
+    "alembic==1.19.1",
+    "argon2-cffi==25.1.0",
+    "pyjwt==2.13.0",
+    "httpx==0.28.1",
+    "numpy==2.5.2",
+    "python-multipart==0.0.32",
+    "pypdf==6.17.0",
+    "defusedxml==0.7.1",
+    "langgraph==1.2.11",
+    "langchain-core==1.6.1",
+    "anthropic==1.3.0",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]==3.3.5", "pgvector==0.5.0"]
+local-embed = ["fastembed==0.8.0"]
+
+[dependency-groups]
+dev = ["pytest==9.1.1", "pytest-asyncio==1.4.0", "ruff==0.16.6", "mypy==2.3.1", "types-defusedxml==0.7.0.20260504"]
+
+[tool.uv]
+# The project sits in a synced OneDrive folder; OneDrive refuses hardlinks into
+# synced paths (os error 396), so copy wheels instead of linking them.
+link-mode = "copy"
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF", "ARG", "PTH", "T20"]
+ignore = ["B008"]  # FastAPI Depends() in argument defaults is idiomatic
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG001", "ARG002", "E501"]
+"scripts/*" = ["T201"]
+# Homoglyphs and invisible characters are the subject matter in the injection
+# guard and its tests. Flagging them as "ambiguous" is exactly backwards.
+"app/security/guard.py" = ["RUF001", "RUF002", "RUF003"]
+"tests/test_security.py" = ["RUF001", "RUF002", "RUF003"]
+# Every graph node has the signature (state, deps) so the workflow can bind
+# them uniformly; deterministic nodes legitimately ignore deps.
+"app/graph/nodes.py" = ["ARG001"]
+# Implementations of an abstract signature must accept every parameter of the
+# contract even when they ignore it. That is conformance, not dead code - and
+# silencing it per-argument with noqa would bury the contract in noise.
+"app/llm/factory.py" = ["ARG002"]
+"app/llm/testing.py" = ["ARG002"]
+# SQLAlchemy TypeDecorator hooks receive `dialect` whether or not a given
+# decorator branches on it.
+"app/db/base.py" = ["ARG002"]
+# Provider/source interfaces: a null or specialised implementation must accept
+# the whole contract even where it ignores part of it.
+"app/search/base.py" = ["ARG002"]
+"app/search/providers.py" = ["ARG002"]
+"app/rag/embeddings.py" = ["ARG002"]
+"app/sources/base.py" = ["ARG002"]
+# Generic[T] rather than PEP 695 syntax: Pydantic generic models still need the
+# explicit TypeVar form for schema generation to work on all supported versions.
+"app/domain/evidence.py" = ["UP046"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["fastembed.*", "pgvector.*", "langgraph.*", "pypdf.*", "defusedxml.*"]
+ignore_missing_imports = true
+
+# Strict mode holds for the domain, services, security, retrieval and source
+# layers - everything where a type error would be a correctness bug in the
+# product's own logic.
+#
+# It is relaxed for the two framework-glue layers. FastAPI's Depends() defaults,
+# SQLAlchemy's declarative attributes and LangGraph's node overloads are all
+# typed in ways that strict mode cannot follow without either a large number of
+# casts or annotations that restate what the framework already knows. The
+# alternative - scattering `# type: ignore` through the routes - would be worse:
+# it hides real errors alongside the noise. The behaviour of these layers is
+# covered by the API tests instead.
+[[tool.mypy.overrides]]
+module = ["app.api.*", "app.graph.workflow"]
+disallow_any_generics = false
+disallow_untyped_defs = false
+warn_return_any = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --strict-markers"
+asyncio_mode = "auto"

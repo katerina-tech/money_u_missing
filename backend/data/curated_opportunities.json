@@ -1,0 +1,96 @@
+{
+  "generated_at": "2026-09-04T14:20:32.164196+00:00",
+  "note": "REAL programmes, recorded by hand from the page at source_url on last_verified_at. Null compensation fields mean the page does not state a figure - not missing data to be filled in later by estimation. Adding an entry here means a person read the page.",
+  "opportunities": [
+    {
+      "id": "curated-exist-gruenderstipendium",
+      "title": "EXIST-Gründerstipendium",
+      "organization": "EXIST - Existenzgründungen aus der Wissenschaft (BMWE)",
+      "category": "FOUNDER_PROGRAM",
+      "subcategory": "Federal startup stipend",
+      "description": "Federal funding programme for students, graduates and researchers founding a company from an innovative, science-based idea, during the pre-founding phase. A connection to a university or research institution is required; the application is made through that institution rather than directly.",
+      "summary": "Federal stipend for science-based startup teams in the pre-founding phase. The programme page does not publish the stipend amounts.",
+      "country": "DE",
+      "remote_type": "UNKNOWN",
+      "required_skills": [],
+      "preferred_skills": [],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "UNKNOWN",
+          "strength": "UNKNOWN"
+        }
+      ],
+      "employment_type": "STIPEND",
+      "compensation_min_minor": null,
+      "compensation_max_minor": null,
+      "compensation_basis": "UNKNOWN",
+      "compensation_period": "UNKNOWN",
+      "tax_treatment": "UNKNOWN",
+      "compensation_verified": false,
+      "estimated_hours_min": null,
+      "estimated_hours_max": null,
+      "deadline": null,
+      "eligibility_text": "Studierende, Absolventinnen und Absolventen sowie Wissenschaftlerinnen und Wissenschaftler mit einer innovativen Gründungsidee aus Wissenschaft und Forschung. Eine Anbindung an eine Hochschule oder Forschungseinrichtung ist erforderlich.",
+      "eligibility_structured": [
+        {
+          "label": "Connection to a university or research institution",
+          "strength": "HARD",
+          "source_text": "Eine Anbindung an eine Hochschule oder Forschungseinrichtung ist essenziell."
+        },
+        {
+          "label": "Science- or research-based founding idea",
+          "strength": "HARD"
+        }
+      ],
+      "source_url": "https://www.exist.de/EXIST/Navigation/DE/Gruendungsfoerderung/EXIST-Gruenderstipendium/exist-gruenderstipendium.html",
+      "evidence_confidence": "SOURCE_BACKED",
+      "last_verified_at": "2026-09-04T14:20:32.164196+00:00",
+      "is_demo": false
+    },
+    {
+      "id": "curated-exist-forschungstransfer",
+      "title": "EXIST-Forschungstransfer",
+      "organization": "EXIST - Existenzgründungen aus der Wissenschaft (BMWE)",
+      "category": "PAID_PROGRAM",
+      "subcategory": "Federal research-transfer funding",
+      "description": "Federal support for research-based startups of high technical complexity with an existing proof of principle. Provides financial support alongside mentoring, access to university infrastructure and networking. A connection to a university or research institution is required.",
+      "summary": "Federal funding for development-intensive, research-based startups. The programme page does not publish the funding amounts or the phase structure.",
+      "country": "DE",
+      "remote_type": "UNKNOWN",
+      "required_skills": [],
+      "required_languages": [
+        {
+          "code": "de",
+          "minimum": "UNKNOWN",
+          "strength": "UNKNOWN"
+        }
+      ],
+      "employment_type": "GRANT_FUNDED",
+      "compensation_min_minor": null,
+      "compensation_max_minor": null,
+      "compensation_basis": "UNKNOWN",
+      "compensation_period": "UNKNOWN",
+      "tax_treatment": "UNKNOWN",
+      "compensation_verified": false,
+      "estimated_hours_min": null,
+      "estimated_hours_max": null,
+      "deadline": null,
+      "eligibility_text": "Besonders entwicklungsintensive Gründungsvorhaben mit vorhandenem Proof of Principle und Anbindung an eine Hochschule oder Forschungseinrichtung.",
+      "eligibility_structured": [
+        {
+          "label": "Existing proof of principle",
+          "strength": "HARD"
+        },
+        {
+          "label": "Connection to a university or research institution",
+          "strength": "HARD"
+        }
+      ],
+      "source_url": "https://www.exist.de/EXIST/Navigation/DE/Gruendungsfoerderung/EXIST-Forschungstransfer/exist-forschungstransfer.html",
+      "evidence_confidence": "SOURCE_BACKED",
+      "last_verified_at": "2026-09-04T14:20:32.164196+00:00",
+      "is_demo": false
+    }
+  ]
+}

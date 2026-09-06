@@ -1,0 +1,241 @@
+{
+  "retrieved_at": "2026-09-04T00:00:00+00:00",
+  "note": "Every value here was read from the source_url on retrieved_at. Entries with content_available=false are registry placeholders: they are listed so the gap is visible, and are never quoted.",
+  "facts": [
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_kleinunternehmer_thresholds",
+      "category": "VAT",
+      "title": "Kleinunternehmerregelung turnover thresholds",
+      "summary": "Umsatzsteuer is not levied where total turnover did not exceed 25,000 EUR in the previous calendar year and does not exceed 100,000 EUR in the current calendar year (§ 19 Abs. 1 UStG).",
+      "structured_value": {
+        "previous_year_eur": 25000,
+        "current_year_eur": 100000,
+        "eu_established_eur": 100000,
+        "statute": "§ 19 UStG"
+      },
+      "effective_from": "2025-01-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/ustg_1980/__19.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_grundfreibetrag",
+      "category": "INCOME_TAX",
+      "title": "Grundfreibetrag",
+      "summary": "The first tariff zone of the income tax scale, on which tax is zero, is 12,348 EUR from Veranlagungszeitraum 2026 (§ 32a Abs. 1 EStG).",
+      "structured_value": {
+        "amount_eur": 12348,
+        "assessment_year_from": 2026,
+        "statute": "§ 32a Abs. 1 EStG"
+      },
+      "effective_from": "2026-01-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/estg/__32a.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_sparer_pauschbetrag",
+      "category": "CAPITAL_INCOME",
+      "title": "Sparer-Pauschbetrag",
+      "summary": "1,000 EUR is deducted as Werbungskosten from income from capital assets; 2,000 EUR for jointly assessed spouses (§ 20 Abs. 9 EStG).",
+      "structured_value": {
+        "single_eur": 1000,
+        "joint_eur": 2000,
+        "statute": "§ 20 Abs. 9 EStG"
+      },
+      "effective_from": "2023-01-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/estg/__20.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": false,
+      "id": "de_minijob_threshold",
+      "category": "MINIJOB",
+      "title": "Geringfügigkeitsgrenze (Minijob earnings limit)",
+      "summary": "The statute states a formula, not an amount: the minimum wage multiplied by 130, divided by three, rounded up to whole euros (§ 8 Abs. 1a SGB IV). The resulting figure is published in the Bundesanzeiger and changes with the minimum wage. We have not recorded the current euro figure, so this product does not state one.",
+      "structured_value": {
+        "formula": "ceil(minimum_wage * 130 / 3)",
+        "amount_eur": null,
+        "published_in": "Bundesanzeiger, by the Bundesministerium fuer Arbeit und Soziales",
+        "statute": "§ 8 Abs. 1a SGB IV"
+      },
+      "effective_from": "2022-10-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/sgb_4/__8.html",
+      "verification_status": "NEEDS_REVIEW"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_alg_hours_limit",
+      "category": "BENEFITS",
+      "title": "15-hour weekly limit while receiving Arbeitslosengeld",
+      "summary": "A secondary activity does not end Beschäftigungslosigkeit where working time is fewer than 15 hours per week; hours across all activities are combined (§ 138 SGB III).",
+      "structured_value": {
+        "hours_per_week_limit": 15,
+        "statute": "§ 138 SGB III"
+      },
+      "effective_from": "2012-04-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/sgb_3/__138.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_alg_nebeneinkommen_freibetrag",
+      "category": "BENEFITS",
+      "title": "165 EUR monthly allowance for secondary income during Arbeitslosengeld",
+      "summary": "165 EUR per calendar month of the activity is disregarded; income above that, after tax, contributions and expenses, is set against the benefit. Self-employed expenses are taken as a flat 30% of gross unless more is evidenced (§ 155 SGB III).",
+      "structured_value": {
+        "allowance_eur_per_month": 165,
+        "self_employed_expense_flat_rate": 0.3,
+        "statute": "§ 155 SGB III"
+      },
+      "effective_from": "2012-04-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/sgb_3/__155.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_tax_registration_deadline",
+      "category": "SELF_EMPLOYMENT",
+      "title": "One-month deadline to notify the tax office of a new activity",
+      "summary": "Taking up a freelance or business activity must be notified within one month of the reportable event, electronically in the officially prescribed format (§ 138 AO). This is the Fragebogen zur steuerlichen Erfassung.",
+      "structured_value": {
+        "deadline_months": 1,
+        "channel": "electronic (officially prescribed interface); paper only on hardship exception",
+        "statute": "§ 138 AO"
+      },
+      "effective_from": "2021-01-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/ao_1977/__138.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_gewerbeanmeldung",
+      "category": "TRADE_REGISTRATION",
+      "title": "Gewerbeanmeldung obligation",
+      "summary": "Anyone beginning the independent operation of a stehendes Gewerbe must notify the competent authority at the same time as starting (§ 14 Abs. 1 GewO).",
+      "structured_value": {
+        "timing": "simultaneously with commencement",
+        "authority": "competent municipal authority",
+        "statute": "§ 14 GewO"
+      },
+      "effective_from": "2009-01-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/gewo/__14.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_invoice_requirements",
+      "category": "INVOICING",
+      "title": "Mandatory invoice content",
+      "summary": "§ 14 Abs. 4 UStG lists ten mandatory elements, including the full names and addresses of both parties, the issuer's Steuernummer or USt-IdNr, the issue date, a unique sequential number, the quantity and nature of the supply, the date of supply, the consideration broken down by tax rate, and the rate and amount of tax.",
+      "structured_value": {
+        "element_count": 10,
+        "statute": "§ 14 Abs. 4 UStG"
+      },
+      "effective_from": "2004-01-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/ustg_1980/__14.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_euer_eligibility",
+      "category": "ACCOUNTING",
+      "title": "Who may use an Einnahmenüberschussrechnung",
+      "summary": "Taxpayers who are not legally obliged to keep books and prepare regular accounts, and who in fact do neither, may take profit as the surplus of business income over business expenses (§ 4 Abs. 3 EStG). Betriebsausgaben are expenses caused by the business (§ 4 Abs. 4 EStG).",
+      "structured_value": {
+        "statute": "§ 4 Abs. 3 und 4 EStG"
+      },
+      "effective_from": "2009-01-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/estg/__4.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": true,
+      "id": "de_freiberuflich_catalogue",
+      "category": "TRADE_REGISTRATION",
+      "title": "Catalogue of freie Berufe",
+      "summary": "§ 18 Abs. 1 Nr. 1 EStG names the Katalogberufe and extends to 'ähnliche Berufe', plus independently exercised scientific, artistic, literary, teaching and educational activity. Whether a modern occupation is 'similar' to a listed profession is decided on the facts and is frequently disputed.",
+      "structured_value": {
+        "statute": "§ 18 Abs. 1 Nr. 1 EStG"
+      },
+      "effective_from": "2009-01-01",
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/estg/__18.html",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": false,
+      "id": "de_kuenstlersozialkasse",
+      "category": "SOCIAL_INSURANCE",
+      "title": "Künstlersozialkasse membership for self-employed creative work",
+      "summary": "NOT YET VERIFIED. Self-employed artists, writers and journalists may be required to be insured through the Künstlersozialkasse, which affects contributions on side income. We have not recorded the current conditions from the authority, so this product does not state them.",
+      "structured_value": {},
+      "source_name": "Künstlersozialkasse",
+      "source_url": "https://www.kuenstlersozialkasse.de/",
+      "verification_status": "UNKNOWN"
+    },
+    {
+      "jurisdiction": "DE",
+      "retrieved_at": "2026-09-04T00:00:00+00:00",
+      "last_verified_at": "2026-09-04T00:00:00+00:00",
+      "content_available": false,
+      "id": "de_uebungsleiterfreibetrag",
+      "category": "INCOME_TAX",
+      "title": "Übungsleiterfreibetrag and Ehrenamtspauschale",
+      "summary": "NOT YET VERIFIED. Tax allowances exist for certain teaching, training and voluntary activity carried out for non-profit or public bodies (§ 3 Nr. 26 and Nr. 26a EStG). We have not recorded the current amounts, so this product does not state them.",
+      "structured_value": {
+        "statute": "§ 3 Nr. 26, Nr. 26a EStG"
+      },
+      "source_name": "Gesetze im Internet (Bundesministerium der Justiz)",
+      "source_url": "https://www.gesetze-im-internet.de/estg/__3.html",
+      "verification_status": "UNKNOWN"
+    }
+  ]
+}

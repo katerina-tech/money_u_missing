@@ -1,0 +1,30 @@
+# --- secrets ---
+.env
+.env.local
+*.pem
+
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- node ---
+node_modules/
+.next/
+*.tsbuildinfo
+frontend/test-results/
+frontend/playwright-report/
+
+# --- local data (regenerate with `make seed`) ---
+backend/data/*.db
+backend/data/*.db-*
+backend/data/uploads/
+backend/data/index/
+
+# --- os ---
+.DS_Store
+Thumbs.db

@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/*
+  Money You're Missing - design tokens.
+
+  The brief was "editorial fintech, Berlin/Zurich": Financial Times clarity
+  crossed with a modern European product. That resolves to a few concrete
+  decisions:
+
+  - Paper, not white. #FBFAF7 reads as a printed page rather than a blank
+    canvas, which is what makes a text-dense product feel considered.
+  - One accent, used sparingly. Cobalt for action and emphasis. A second accent
+    would compete, and competing accents are how a serious product starts
+    looking like a dashboard template.
+  - Semantic colours are for *evidence*, never for decoration. Verified,
+    unverified, demo and unknown each have exactly one colour, and nothing else
+    in the interface is allowed to use them.
+  - A serif for display, a grotesque for interface, tabular figures for money.
+    Money that shifts as digits change is money the reader distrusts.
+*/
+
+@theme {
+  --color-paper: #fbfaf7;
+  --color-paper-raised: #ffffff;
+  --color-paper-sunk: #f3f1eb;
+
+  --color-ink: #14161a;
+  --color-ink-muted: #4c5259;
+  --color-ink-faint: #7b828b;
+  --color-rule: #e3e0d8;
+  --color-rule-strong: #cfcbc0;
+
+  --color-cobalt: #1c46d9;
+  --color-cobalt-deep: #142f8f;
+  --color-cobalt-wash: #eef2fe;
+
+  /* Evidence palette. Reserved - nothing decorative may use these. */
+  --color-verified: #1c6b45;
+  --color-verified-wash: #e8f3ec;
+  --color-sourced: #1c46d9;
+  --color-sourced-wash: #eef2fe;
+  --color-unverified: #8a6212;
+  --color-unverified-wash: #fbf3e0;
+  --color-demo: #6b3fa0;
+  --color-demo-wash: #f2ecfa;
+  --color-unknown: #5b6169;
+  --color-unknown-wash: #f0efeb;
+  --color-danger: #a2251f;
+  --color-danger-wash: #fbeceb;
+
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino,
+    Georgia, "Times New Roman", serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+
+  --radius-card: 6px;
+}
+
+/* Dark mode inverts the paper metaphor rather than abandoning it: warm ink,
+   not pure black, so long reading stays comfortable.
+
+   Note the shape: `@theme` cannot be nested inside a media query in Tailwind
+   v4 - it is hoisted, which silently makes the dark palette unconditional and
+   the light design unreachable. Overriding the generated custom properties on
+   :root is the supported way to do this, and it is what actually works. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #14161a;
+    --color-paper-raised: #1b1e23;
+    --color-paper-sunk: #101216;
+    --color-ink: #f2f1ed;
+    --color-ink-muted: #a8aeb6;
+    --color-ink-faint: #7b828b;
+    --color-rule: #2b2f36;
+    --color-rule-strong: #3c414a;
+    --color-cobalt: #7b9aff;
+    --color-cobalt-deep: #a8bcff;
+    --color-cobalt-wash: #1a2140;
+    --color-verified: #6cc79b;
+    --color-verified-wash: #16281f;
+    --color-sourced: #7b9aff;
+    --color-sourced-wash: #1a2140;
+    --color-unverified: #d9ab52;
+    --color-unverified-wash: #2b2314;
+    --color-demo: #b892e0;
+    --color-demo-wash: #241a33;
+    --color-unknown: #9aa1aa;
+    --color-unknown-wash: #1f2228;
+    --color-danger: #e8837c;
+    --color-danger-wash: #2e1817;
+  }
+}
+
+* {
+  border-color: var(--color-rule);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+/* Money and scores. Tabular figures so columns align and a number does not
+   jitter as it updates. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+.rule {
+  border-top: 1px solid var(--color-rule);
+}
+
+/* Focus is always visible and never removed. Keyboard users are not an
+   afterthought in a product people will fill in a whole profile on. */
+:focus-visible {
+  outline: 2px solid var(--color-cobalt);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+::selection {
+  background: var(--color-cobalt-wash);
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The landing page's flow diagram. A single keyframe, reduced-motion aware. */
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: riseIn 480ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 60;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 4px;
+}
