@@ -46,8 +46,8 @@ def load_baseline(session: Session, user_id: str) -> BaselinePicture:
                 label=row.label,
                 amount_minor=row.amount_minor,
                 currency=row.currency,
-                basis=row.basis,  # type: ignore[arg-type]
-                period=row.period,  # type: ignore[arg-type]
+                basis=row.basis,
+                period=row.period,
                 is_primary=row.is_primary,
                 started_on=row.started_on,
             )
@@ -87,10 +87,10 @@ def load_expenses(
             label=row.label,
             amount_minor=row.amount_minor,
             currency=row.currency,
-            category=row.category,  # type: ignore[arg-type]
+            category=row.category,
             incurred_on=row.incurred_on,
-            has_receipt=row.has_receipt,  # type: ignore[arg-type]
-            partly_private=row.partly_private,  # type: ignore[arg-type]
+            has_receipt=row.has_receipt,
+            partly_private=row.partly_private,
             income_stream_id=row.income_stream_id,
             application_id=row.application_id,
             notes=row.notes,
@@ -135,8 +135,8 @@ def load_household(profile: Profile | None) -> HouseholdContext:
         has_children = Tristate.YES.value
 
     return HouseholdContext(
-        has_children=has_children,  # type: ignore[arg-type]
-        jointly_assessed=profile.jointly_assessed,  # type: ignore[arg-type]
+        has_children=has_children,
+        jointly_assessed=profile.jointly_assessed,
         children=children,
     )
 
