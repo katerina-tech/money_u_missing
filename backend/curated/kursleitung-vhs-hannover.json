@@ -1,0 +1,47 @@
+{
+  "country": "DE",
+  "remote_type": "UNKNOWN",
+  "required_skills": [],
+  "preferred_skills": [],
+  "required_languages": [
+    {
+      "code": "de",
+      "minimum": "UNKNOWN",
+      "strength": "UNKNOWN"
+    }
+  ],
+  "employment_type": "FREELANCE",
+  "tax_treatment": "UNKNOWN",
+  "compensation_verified": true,
+  "estimated_hours_min": null,
+  "estimated_hours_max": null,
+  "deadline": null,
+  "evidence_confidence": "SOURCE_BACKED",
+  "last_verified_at": "2026-09-06T21:01:03.869528+00:00",
+  "id": "curated-kursleitung-vhs-hannover",
+  "title": "Kursleitung - Volkshochschule Hannover",
+  "organization": "Ada-und-Theodor-Lessing-Volkshochschule Hannover",
+  "category": "TEACHING",
+  "subcategory": "Adult education course leader",
+  "description": "The VHS Hannover's Honorarordnung, in force from 1 August 2025, applies to freelance course leaders. It sets a floor rather than a scale: a higher fee can be agreed in writing where economic considerations, particular subject expertise or qualification, higher demands on teaching method, or a third-party funder's requirements make it appropriate. Adult education is a realistic entry route for a professional with subject expertise but no university teaching record. The institution publishes this rate in its own regulation. The page does not advertise a specific open assignment, and whether one is currently available is not stated - that is a question for the faculty.",
+  "summary": "A minimum fee of 25 Euro. The regulation states a floor and an explicit route to more; it does not publish a ceiling, so the upper bound is genuinely unknown.",
+  "compensation_min_minor": 2500,
+  "compensation_max_minor": null,
+  "compensation_basis": "PER_HOUR",
+  "compensation_period": "IRREGULAR",
+  "source_excerpt": "3. Honorarsaetze. Das Mindesthonorar fuer die Leitung von Kursen und die Durchfuehrung von Veranstaltungen oder Vortraegen, sowie Sprachstandfeststellungen betraegt 25,00 Euro. Soweit aufgrund wirtschaftlicher Erwaegungen, besonderer Fachkenntnis oder Qualifikation, hoeheren Anforderungen an die Vermittlungsmethodik oder Anforderungen von Drittmittelgebenden ein hoeheres Honorar angemessen ist, kann dies nach Entscheidung der Sachgebietsleitung schriftlich vereinbart werden. 7. Inkrafttreten. Diese Honorarordnung tritt mit Wirkung zum 01.08.2025 in Kraft.",
+  "eligibility_text": "Die Honorarordnung gilt fuer freiberuflich taetige Kursleitungen. Ein hoeheres Honorar kann bei besonderer Fachkenntnis oder Qualifikation schriftlich vereinbart werden.",
+  "eligibility_structured": [
+    {
+      "label": "Engaged on a freelance basis, not employed",
+      "strength": "HARD",
+      "source_text": "fuer freiberuflich taetige Kursleitungen"
+    },
+    {
+      "label": "Subject expertise or qualification can justify a higher fee",
+      "strength": "SOFT",
+      "source_text": "besonderer Fachkenntnis oder Qualifikation"
+    }
+  ],
+  "source_url": "https://www.hannover.de/content/download/407385/file/Honorarordnung_VHS.pdf"
+}

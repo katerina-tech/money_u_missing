@@ -197,9 +197,18 @@ def typecheck() -> None:
     run([NPX, "tsc", "--noEmit"], cwd=FRONTEND)
 
 
+def validate_data() -> None:
+    """Gate the curated dataset: no unquoted figure on a real opportunity."""
+    run([python(), "-m", "scripts.validate_curated"], cwd=BACKEND)
+
+
 def check() -> None:
     """Everything CI runs, in the order that fails fastest."""
     lint()
+    # Cheap, and it guards the product's central promise, so it runs early:
+    # a fabricated compensation figure should fail the build before a slow
+    # test suite gets the chance to pass.
+    validate_data()
     typecheck()
     test()
     evaluate()
@@ -271,6 +280,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "data": data,
     "migrate": migrate,
     "seed": seed,
+    "validate-data": validate_data,
     "dev": dev,
     "dev-api": dev_api,
     "dev-web": dev_web,

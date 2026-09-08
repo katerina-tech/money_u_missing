@@ -10,6 +10,12 @@ from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
+
+# The custom column types (UtcDateTime, JsonDict, StringList, Vector) are
+# rendered by autogenerate as `app.db.base.X` but the import is not emitted
+# with them, so every migration that touches one fails at import time.
+# Importing it unconditionally costs nothing and removes the trap.
+import app.db.base  # noqa: F401
 ${imports if imports else ''}
 
 revision: str = ${repr(up_revision)}

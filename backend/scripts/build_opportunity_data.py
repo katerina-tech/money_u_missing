@@ -10,7 +10,8 @@ stylistic choice. Every record carries ``is_demo: true``, and the schema forbids
 a demo record from claiming verified compensation. Deadlines are generated
 relative to the run date so the demo never shows an expired opportunity.
 
-**curated_opportunities.json** - real programmes, recorded by hand from the
+**curated_opportunities.json** - real programmes, assembled from the one-file-
+per-record sources in ``backend/curated/``, each recorded by hand from the
 publisher's own page, with the URL that was read and the date it was read. Their
 compensation fields are largely null, and that is not an oversight: the pages
 were checked and do not state the amounts. Publishing a plausible figure for a
@@ -445,120 +446,35 @@ DEMO: list[dict] = [
 
 
 # ========================================================= curated dataset
-# Real programmes. Every field below was read from the page named in
-# source_url on the date in last_verified_at. Where the page does not state a
-# figure, the field is null and stays null.
+# Real programmes. These are NOT written here.
+#
+# Each one lives in its own file under ``backend/curated/``, because adding a
+# real opportunity should be editing a data file, not editing Python. That was
+# the actual reason this dataset held two records for so long: the cost of
+# adding the third was "open a source file, get thirty fields right, do not
+# break the build".
+#
+# Every field in those files was read from the page named in ``source_url`` on
+# the date in ``last_verified_at``. Where a page does not state a figure, the
+# field is null and stays null. ``scripts/validate_curated.py`` enforces that,
+# and it runs as part of `check`.
 
-CURATED: list[dict] = [
-    {
-        "id": "curated-exist-gruenderstipendium",
-        "title": "EXIST-Gründerstipendium",
-        "organization": "EXIST - Existenzgründungen aus der Wissenschaft (BMWE)",
-        "category": "FOUNDER_PROGRAM",
-        "subcategory": "Federal startup stipend",
-        "description": (
-            "Federal funding programme for students, graduates and researchers founding a "
-            "company from an innovative, science-based idea, during the pre-founding "
-            "phase. A connection to a university or research institution is required; the "
-            "application is made through that institution rather than directly."
-        ),
-        "summary": (
-            "Federal stipend for science-based startup teams in the pre-founding phase. "
-            "The programme page does not publish the stipend amounts."
-        ),
-        "country": "DE",
-        "remote_type": "UNKNOWN",
-        "required_skills": [],
-        "preferred_skills": [],
-        "required_languages": [{"code": "de", "minimum": "UNKNOWN", "strength": "UNKNOWN"}],
-        "employment_type": "STIPEND",
-        # The page describes the programme but does not state the amounts. We
-        # therefore state nothing. This is the single most important line in
-        # this file: a plausible figure here would be a fabricated fact about a
-        # real federal programme.
-        "compensation_min_minor": None,
-        "compensation_max_minor": None,
-        "compensation_basis": "UNKNOWN",
-        "compensation_period": "UNKNOWN",
-        "tax_treatment": "UNKNOWN",
-        "compensation_verified": False,
-        "estimated_hours_min": None,
-        "estimated_hours_max": None,
-        "deadline": None,
-        "eligibility_text": (
-            "Studierende, Absolventinnen und Absolventen sowie Wissenschaftlerinnen und "
-            "Wissenschaftler mit einer innovativen Gründungsidee aus Wissenschaft und "
-            "Forschung. Eine Anbindung an eine Hochschule oder Forschungseinrichtung ist "
-            "erforderlich."
-        ),
-        "eligibility_structured": [
-            {
-                "label": "Connection to a university or research institution",
-                "strength": "HARD",
-                "source_text": (
-                    "Eine Anbindung an eine Hochschule oder Forschungseinrichtung "
-                    "ist essenziell."
-                ),
-            },
-            {"label": "Science- or research-based founding idea", "strength": "HARD"},
-        ],
-        "source_url": (
-            "https://www.exist.de/EXIST/Navigation/DE/Gruendungsfoerderung/"
-            "EXIST-Gruenderstipendium/exist-gruenderstipendium.html"
-        ),
-        "evidence_confidence": "SOURCE_BACKED",
-        "last_verified_at": NOW,
-    },
-    {
-        "id": "curated-exist-forschungstransfer",
-        "title": "EXIST-Forschungstransfer",
-        "organization": "EXIST - Existenzgründungen aus der Wissenschaft (BMWE)",
-        "category": "PAID_PROGRAM",
-        "subcategory": "Federal research-transfer funding",
-        "description": (
-            "Federal support for research-based startups of high technical complexity "
-            "with an existing proof of principle. Provides financial support alongside "
-            "mentoring, access to university infrastructure and networking. A connection "
-            "to a university or research institution is required."
-        ),
-        "summary": (
-            "Federal funding for development-intensive, research-based startups. The "
-            "programme page does not publish the funding amounts or the phase structure."
-        ),
-        "country": "DE",
-        "remote_type": "UNKNOWN",
-        "required_skills": [],
-        "required_languages": [{"code": "de", "minimum": "UNKNOWN", "strength": "UNKNOWN"}],
-        "employment_type": "GRANT_FUNDED",
-        "compensation_min_minor": None,
-        "compensation_max_minor": None,
-        "compensation_basis": "UNKNOWN",
-        "compensation_period": "UNKNOWN",
-        "tax_treatment": "UNKNOWN",
-        "compensation_verified": False,
-        "estimated_hours_min": None,
-        "estimated_hours_max": None,
-        "deadline": None,
-        "eligibility_text": (
-            "Besonders entwicklungsintensive Gründungsvorhaben mit vorhandenem Proof of "
-            "Principle und Anbindung an eine Hochschule oder Forschungseinrichtung."
-        ),
-        "eligibility_structured": [
-            {"label": "Existing proof of principle", "strength": "HARD"},
-            {"label": "Connection to a university or research institution", "strength": "HARD"},
-        ],
-        "source_url": (
-            "https://www.exist.de/EXIST/Navigation/DE/Gruendungsfoerderung/"
-            "EXIST-Forschungstransfer/exist-forschungstransfer.html"
-        ),
-        "evidence_confidence": "SOURCE_BACKED",
-        "last_verified_at": NOW,
-    },
-]
+CURATED_DIR = BACKEND / "curated"
+
+
+def load_curated() -> list[dict]:
+    """Read every curated record, sorted by filename so builds are stable."""
+    if not CURATED_DIR.is_dir():
+        return []
+    records: list[dict] = []
+    for path in sorted(CURATED_DIR.glob("*.json")):
+        records.append(json.loads(path.read_text(encoding="utf-8")))
+    return records
 
 
 def main() -> None:
     DATA.mkdir(parents=True, exist_ok=True)
+    curated = load_curated()
 
     (DATA / "demo_opportunities.json").write_text(
         json.dumps(
@@ -592,7 +508,7 @@ def main() -> None:
                     "state a figure - not missing data to be filled in later by "
                     "estimation. Adding an entry here means a person read the page."
                 ),
-                "opportunities": [{**record, "is_demo": False} for record in CURATED],
+                "opportunities": [{**record, "is_demo": False} for record in curated],
             },
             indent=2,
             ensure_ascii=False,
@@ -600,7 +516,7 @@ def main() -> None:
         + "\n",
         encoding="utf-8",
     )
-    print(f"wrote {len(DEMO)} demo and {len(CURATED)} curated opportunities to {DATA}")
+    print(f"wrote {len(DEMO)} demo and {len(curated)} curated opportunities to {DATA}")
 
 
 if __name__ == "__main__":

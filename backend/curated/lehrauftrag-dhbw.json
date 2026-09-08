@@ -1,0 +1,47 @@
+{
+  "country": "DE",
+  "remote_type": "UNKNOWN",
+  "required_skills": [],
+  "preferred_skills": [],
+  "required_languages": [
+    {
+      "code": "de",
+      "minimum": "UNKNOWN",
+      "strength": "UNKNOWN"
+    }
+  ],
+  "employment_type": "FREELANCE",
+  "tax_treatment": "UNKNOWN",
+  "compensation_verified": true,
+  "estimated_hours_min": null,
+  "estimated_hours_max": null,
+  "deadline": null,
+  "evidence_confidence": "SOURCE_BACKED",
+  "last_verified_at": "2026-09-06T21:01:03.869528+00:00",
+  "id": "curated-lehrauftrag-dhbw",
+  "title": "Lehrauftrag in Bachelor programmes - Duale Hochschule Baden-Wuerttemberg",
+  "organization": "Duale Hochschule Baden-Wuerttemberg (DHBW)",
+  "category": "TEACHING",
+  "subcategory": "Dual university Lehrauftrag",
+  "description": "The DHBW's Lehrverguetungssatzung of 30 September 2019 sets the rate per teaching hour for Bachelor programmes by type of session. The rate covers everything connected with the teaching, including preparation and individual supervision. The DHBW model is built around lecturers who work in industry, which makes this one of the more accessible teaching routes for a practising professional. The institution publishes this rate in its own regulation. The page does not advertise a specific open assignment, and whether one is currently available is not stated - that is a question for the faculty.",
+  "summary": "42 Euro per teaching hour for a regular in-person session; 14 Euro for unsupervised guided self-study; up to 55 Euro in justified individual cases.",
+  "compensation_min_minor": 1400,
+  "compensation_max_minor": 5500,
+  "compensation_basis": "PER_HOUR",
+  "compensation_period": "IRREGULAR",
+  "source_excerpt": "Paragraf 2 Verguetung (2) Fuer Lehrveranstaltungen werden folgende Verguetungssaetze fuer die Lehrbeauftragten je Lehrstunde festgesetzt: Nr. 1 Begleitetes Selbststudium ohne Aufsicht 14 Euro; Nr. 2 Begleitetes Selbststudium unter Aufsicht 42 Euro; Nr. 3 Regulaere Praesenzveranstaltung 42 Euro; Nr. 4 Sprachvorlesungen 42 Euro; Nr. 5 Besonderer Einzelfall 55 Euro. (1) 2In besonderen Einzelfaellen kann durch die Rektorin / den Rektor der Studienakademien der Hoechstbetrag von 55 Euro festgelegt werden.",
+  "eligibility_text": "Diese Satzung regelt die Hoehe der Verguetung von Lehrtaetigkeiten in Bachelor-Studiengaengen, die von Lehrbeauftragten nach Nr. 3.3 der Verwaltungsvorschrift des Finanzministeriums ueber die Verguetung von nebenamtlichen/nebenberuflichen Unterricht (UVergVwV) wahrgenommen werden.",
+  "eligibility_structured": [
+    {
+      "label": "Teaching is on a nebenamtlich or nebenberuflich basis under the UVergVwV",
+      "strength": "HARD",
+      "source_text": "die von Lehrbeauftragten nach Nr. 3.3 der Verwaltungsvorschrift des Finanzministeriums ueber die Verguetung von nebenamtlichen/nebenberuflichen Unterricht (UVergVwV) wahrgenommen werden"
+    },
+    {
+      "label": "Applies to Bachelor programmes",
+      "strength": "HARD",
+      "source_text": "Verguetung von Lehrtaetigkeiten in Bachelor-Studiengaengen"
+    }
+  ],
+  "source_url": "https://www.dhbw.de/fileadmin/user_upload/Dokumente/Amtliche_Bekanntmachungen/2019/29_2019_Bekanntmachung_Lehrverguetungssatzung.pdf"
+}

@@ -1,0 +1,47 @@
+{
+  "country": "DE",
+  "remote_type": "UNKNOWN",
+  "required_skills": [],
+  "preferred_skills": [],
+  "required_languages": [
+    {
+      "code": "de",
+      "minimum": "UNKNOWN",
+      "strength": "UNKNOWN"
+    }
+  ],
+  "employment_type": "FREELANCE",
+  "tax_treatment": "UNKNOWN",
+  "compensation_verified": true,
+  "estimated_hours_min": null,
+  "estimated_hours_max": null,
+  "deadline": null,
+  "evidence_confidence": "SOURCE_BACKED",
+  "last_verified_at": "2026-09-06T21:01:03.869528+00:00",
+  "id": "curated-lehrauftrag-hawk",
+  "title": "Lehrauftrag - HAWK Hildesheim/Holzminden/Goettingen",
+  "organization": "HAWK Hochschule fuer angewandte Wissenschaft und Kunst Hildesheim/Holzminden/Goettingen",
+  "category": "TEACHING",
+  "subcategory": "University of applied sciences Lehrauftrag",
+  "description": "The HAWK's Ordnung on Lehrauftrag rates, applying from the 2018 summer semester. Rates are set as ceilings rather than fixed amounts and vary with the teaching role. The highest band, up to 100 Euro, applies only to approved academic continuing-education offerings that cover their own costs. The institution publishes this rate in its own regulation. The page does not advertise a specific open assignment, and whether one is currently available is not stated - that is a question for the faculty.",
+  "summary": "Up to 30 Euro per teaching hour for a Lehrkraft fuer besondere Aufgaben, up to 40 Euro for professor-level teaching duties, and up to 100 Euro in approved continuing education. These are maxima, not the amount you will be offered.",
+  "compensation_min_minor": 3000,
+  "compensation_max_minor": 10000,
+  "compensation_basis": "PER_HOUR",
+  "compensation_period": "IRREGULAR",
+  "source_excerpt": "Paragraf 1 Verguetung fuer Lehrauftraege (1) Lehrbeauftragte mit den Lehraufgaben einer Professorin oder eines Professors koennen bis zu einer Hoehe von 40 Euro je Lehrstunde verguetet werden. (2) Lehrbeauftragte mit den Lehraufgaben einer Lehrkraft fuer besondere Aufgaben koennen bis zu einer Hoehe von 30 Euro je Lehrstunde verguetet werden. (3) ... koennen im Rahmen der vom Praesidium genehmigten Angebote in der wissenschaftlichen Weiterbildung bis zu einer Hoehe von 100 Euro je geleistete Lehrstunde verguetet werden, wenn eine entsprechende Kostendeckung aus den Weiterbildungsangeboten sichergestellt ist.",
+  "eligibility_text": "Die Hoehe richtet sich nach den uebernommenen Lehraufgaben: Lehraufgaben einer Professorin oder eines Professors, Lehraufgaben einer Lehrkraft fuer besondere Aufgaben, oder Lehrauftraege an Studierende.",
+  "eligibility_structured": [
+    {
+      "label": "Rate band follows the teaching role assigned, not the applicant's title",
+      "strength": "SOFT",
+      "source_text": "Lehrbeauftragte mit den Lehraufgaben einer Professorin oder eines Professors"
+    },
+    {
+      "label": "The 100 Euro band requires an approved continuing-education offering that covers its costs",
+      "strength": "HARD",
+      "source_text": "wenn eine entsprechende Kostendeckung aus den Weiterbildungsangeboten sichergestellt ist"
+    }
+  ],
+  "source_url": "https://www.hawk.de/sites/default/files/2018-05/lavergo_z_00_ordnung_verguetung_lehrauftraege_hawk.pdf"
+}

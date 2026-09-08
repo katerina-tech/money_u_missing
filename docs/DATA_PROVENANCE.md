@@ -30,18 +30,55 @@ Consequences that are visible in the data:
 
 ### Curated — real, human-recorded
 
-Two records, both read by hand from the programme's own page on **2026-09-04**.
+Seven records, each read by hand from the publisher's own page. One file per
+record under `backend/curated/`, so adding one is editing data rather than
+editing Python.
+
+**Read 2026-09-04 — federal programmes, no amount published:**
 
 | Programme | Source | Compensation |
 |---|---|---|
 | EXIST-Gründerstipendium | [exist.de](https://www.exist.de/EXIST/Navigation/DE/Gruendungsfoerderung/EXIST-Gruenderstipendium/exist-gruenderstipendium.html) | `null` — the page does not state the amounts |
 | EXIST-Forschungstransfer | [exist.de](https://www.exist.de/EXIST/Navigation/DE/Gruendungsfoerderung/EXIST-Forschungstransfer/exist-forschungstransfer.html) | `null` — the page does not state the amounts |
 
-**Those nulls are the most important data in this repository.** Both are real
-federal programmes that certainly pay something. We do not know how much,
-because the pages we read do not say. Publishing a plausible figure would be
-exactly the failure this product exists to avoid, so the records say the amount
-is not published and the interface renders "Not published".
+**Read 2026-09-06 — teaching rates, published verbatim in the institution's own
+regulation:**
+
+| Institution | Source | Compensation, as published |
+|---|---|---|
+| Universität Erfurt | [Satzung, Lesefassung 2024-01-31](https://www.uni-erfurt.de/fileadmin/Hauptseiten/Studium/Hochschulrecht/Satzungsrecht_UE/weitere-Satzungen/3.AEnd_LA_Verg_S___2024-01-31_Lesefassung.pdf) | 33,00 / 38,00 / 43,00 € per Einzelstunde, by qualification |
+| DHBW | [Lehrvergütungssatzung, 2019-09-30](https://www.dhbw.de/fileadmin/user_upload/Dokumente/Amtliche_Bekanntmachungen/2019/29_2019_Bekanntmachung_Lehrverguetungssatzung.pdf) | 14 / 42 / 55 € je Lehrstunde, by session type |
+| HAWK Hildesheim/Holzminden/Göttingen | [Ordnung, from SoSe 2018](https://www.hawk.de/sites/default/files/2018-05/lavergo_z_00_ordnung_verguetung_lehrauftraege_hawk.pdf) | up to 30 / 40 / 100 € je Lehrstunde, by teaching role |
+| Universität Speyer | [Regelung, from 2022-04-01](https://www.uni-speyer.de/fileadmin/Universitaet/Rechtsgrundlagen/Lehrauftragsverguetung-1.pdf) | 31 € per Einzelstunde (45 min); 9 € per marked script |
+| VHS Hannover | [Honorarordnung, from 2025-08-01](https://www.hannover.de/content/download/407385/file/Honorarordnung_VHS.pdf) | 25,00 € minimum; no ceiling published |
+
+Two things about that second table are deliberate.
+
+**The unit is a teaching hour, not a clock hour.** Every one of these rates is
+per *Einzelstunde* or *Lehrstunde* — 45 minutes at most of these institutions —
+and the published rate already absorbs preparation and marking. Each record says
+so in its summary, because "42 €/hour" read as a clock hour is a materially
+different number from the one the institution actually publishes.
+
+**These pages publish a rate, not a vacancy.** None of them advertises a
+specific open assignment. Every record says that in as many words rather than
+implying an opening that may not exist.
+
+### The nulls, and the rule that now protects them
+
+**The EXIST nulls are still the most important data in this repository.** Both
+are real federal programmes that certainly pay something. We do not know how
+much, because the pages we read do not say. Publishing a plausible figure would
+be exactly the failure this product exists to avoid, so the records say the
+amount is not published and the interface renders "Not published".
+
+That used to be protected by care alone. It is now protected by
+`scripts/validate_curated.py`, which runs as part of `check` and **fails the
+build** if a record states a compensation figure whose digits do not appear in
+the `source_excerpt` quoted from the page. Typing a plausible stipend onto a
+real federal programme is no longer something a careless afternoon can do: it
+would require also fabricating the sentence that says so, which is a different
+and far more deliberate act.
 
 `CuratedOpportunitySource` refuses to load a record without a `source_url`.
 Curation is the claim that a person looked at a page; a record with nothing to

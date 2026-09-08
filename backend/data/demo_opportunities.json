@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T14:20:32.164196+00:00",
+  "generated_at": "2026-09-06T21:01:13.769471+00:00",
   "note": "FICTIONAL DATA. Every organisation named here is invented and marked as such. Every record is loaded with is_demo=true and can never claim verified compensation. Do not treat any of these as a real offer.",
   "opportunities": [
     {
@@ -91,7 +91,7 @@
       "tax_treatment": "GROSS",
       "estimated_hours_min": 8,
       "estimated_hours_max": 12,
-      "deadline": "2026-09-25",
+      "deadline": "2026-09-27",
       "eligibility_structured": [
         {
           "label": "Able to invoice as a freelancer in Germany",
@@ -132,7 +132,7 @@
       "tax_treatment": "UNKNOWN",
       "estimated_hours_min": 4,
       "estimated_hours_max": 6,
-      "deadline": "2026-10-08",
+      "deadline": "2026-10-10",
       "eligibility_text": "Ein abgeschlossenes Hochschulstudium ist Voraussetzung.",
       "eligibility_structured": [
         {
@@ -208,7 +208,7 @@
       "tax_treatment": "GROSS",
       "estimated_hours_min": 1,
       "estimated_hours_max": 1,
-      "deadline": "2026-09-16",
+      "deadline": "2026-09-18",
       "source_url": "https://example.invalid/demo/research-panel",
       "is_demo": true,
       "compensation_verified": false
@@ -234,7 +234,7 @@
       "tax_treatment": "UNKNOWN",
       "estimated_hours_min": 2,
       "estimated_hours_max": 2,
-      "deadline": "2026-10-19",
+      "deadline": "2026-10-21",
       "source_url": "https://example.invalid/demo/mentoring",
       "is_demo": true,
       "compensation_verified": false
@@ -260,7 +260,7 @@
       "tax_treatment": "UNKNOWN",
       "estimated_hours_min": 6,
       "estimated_hours_max": 10,
-      "deadline": "2026-10-02",
+      "deadline": "2026-10-04",
       "eligibility_text": "Open to residents of Germany. A co-founder is not required.",
       "eligibility_structured": [
         {
@@ -303,7 +303,7 @@
       "tax_treatment": "UNKNOWN",
       "estimated_hours_min": null,
       "estimated_hours_max": null,
-      "deadline": "2026-10-30",
+      "deadline": "2026-11-01",
       "eligibility_text": "Antragsberechtigt sind natürliche Personen mit Wohnsitz in Niedersachsen sowie Kleinstunternehmen.",
       "eligibility_structured": [
         {
@@ -339,7 +339,7 @@
       "tax_treatment": "UNKNOWN",
       "estimated_hours_min": 4,
       "estimated_hours_max": 8,
-      "deadline": "2026-09-13",
+      "deadline": "2026-09-15",
       "source_url": "https://example.invalid/demo/data-challenge",
       "is_demo": true,
       "compensation_verified": false
@@ -375,7 +375,7 @@
       "tax_treatment": "UNKNOWN",
       "estimated_hours_min": 8,
       "estimated_hours_max": 8,
-      "deadline": "2026-09-06",
+      "deadline": "2026-09-08",
       "source_url": "https://example.invalid/demo/fellowship",
       "is_demo": true,
       "compensation_verified": false
@@ -410,7 +410,7 @@
       "tax_treatment": "GROSS",
       "estimated_hours_min": 16,
       "estimated_hours_max": 16,
-      "deadline": "2026-10-14",
+      "deadline": "2026-10-16",
       "source_url": "https://example.invalid/demo/part-time-analyst",
       "is_demo": true,
       "compensation_verified": false
@@ -469,7 +469,7 @@
       "tax_treatment": "UNKNOWN",
       "estimated_hours_min": 10,
       "estimated_hours_max": 20,
-      "deadline": "2026-09-21",
+      "deadline": "2026-09-23",
       "source_url": "https://example.invalid/demo/conference-cfp",
       "is_demo": true,
       "compensation_verified": false

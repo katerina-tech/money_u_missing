@@ -1,0 +1,42 @@
+{
+  "country": "DE",
+  "remote_type": "UNKNOWN",
+  "required_skills": [],
+  "preferred_skills": [],
+  "required_languages": [
+    {
+      "code": "de",
+      "minimum": "UNKNOWN",
+      "strength": "UNKNOWN"
+    }
+  ],
+  "employment_type": "FREELANCE",
+  "tax_treatment": "UNKNOWN",
+  "compensation_verified": true,
+  "estimated_hours_min": null,
+  "estimated_hours_max": null,
+  "deadline": null,
+  "evidence_confidence": "SOURCE_BACKED",
+  "last_verified_at": "2026-09-06T21:01:03.869528+00:00",
+  "id": "curated-lehrauftrag-uni-erfurt",
+  "title": "Lehrauftrag - Universitaet Erfurt",
+  "organization": "Universitaet Erfurt",
+  "category": "TEACHING",
+  "subcategory": "University Lehrauftrag",
+  "description": "The university's Satzung on Lehrauftrag compensation, applying to assignments granted from the 2024 summer semester. The rate is banded by the lecturer's qualification, and the published amounts already account for preparation, marking and examinations. The institution publishes this rate in its own regulation. The page does not advertise a specific open assignment, and whether one is currently available is not stated - that is a question for the faculty.",
+  "summary": "33 to 43 Euro per taught unit depending on qualification. The unit is 45 minutes (60 in artistic subjects), not a clock hour.",
+  "compensation_min_minor": 3300,
+  "compensation_max_minor": 4300,
+  "compensation_basis": "PER_HOUR",
+  "compensation_period": "IRREGULAR",
+  "source_excerpt": "Paragraf 3 Verguetungssaetze fuer Lehrauftraege (1) Fuer eine tatsaechlich geleistete Einzelstunde im Umfang von 45 bzw. 60 Minuten erhalten a) habilitierte oder vergleichbar qualifizierte Lehrbeauftragte, die Aufgaben wie Hochschullehrerinnen bzw. Hochschullehrer wahrnehmen (insbesondere Vorlesungen) 43,00 Euro, b) promovierte oder vergleichbar qualifizierte Lehrbeauftragte 38,00 Euro, c) sonstige Lehrbeauftragte 33,00 Euro.",
+  "eligibility_text": "Die Verguetungssaetze richten sich nach der Qualifikation: habilitierte oder vergleichbar qualifizierte Lehrbeauftragte, promovierte oder vergleichbar qualifizierte Lehrbeauftragte, sonstige Lehrbeauftragte.",
+  "eligibility_structured": [
+    {
+      "label": "Qualification band determines the rate; no minimum qualification is stated for the lowest band",
+      "strength": "SOFT",
+      "source_text": "c) sonstige Lehrbeauftragte 33,00 Euro"
+    }
+  ],
+  "source_url": "https://www.uni-erfurt.de/fileadmin/Hauptseiten/Studium/Hochschulrecht/Satzungsrecht_UE/weitere-Satzungen/3.AEnd_LA_Verg_S___2024-01-31_Lesefassung.pdf"
+}

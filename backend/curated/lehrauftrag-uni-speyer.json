@@ -1,0 +1,52 @@
+{
+  "country": "DE",
+  "remote_type": "UNKNOWN",
+  "required_skills": [],
+  "preferred_skills": [],
+  "required_languages": [
+    {
+      "code": "de",
+      "minimum": "UNKNOWN",
+      "strength": "UNKNOWN"
+    }
+  ],
+  "employment_type": "FREELANCE",
+  "tax_treatment": "UNKNOWN",
+  "compensation_verified": true,
+  "estimated_hours_min": null,
+  "estimated_hours_max": null,
+  "deadline": null,
+  "evidence_confidence": "SOURCE_BACKED",
+  "last_verified_at": "2026-09-06T21:01:03.869528+00:00",
+  "id": "curated-lehrauftrag-uni-speyer",
+  "title": "Lehrauftrag - Deutsche Universitaet fuer Verwaltungswissenschaften Speyer",
+  "organization": "Deutsche Universitaet fuer Verwaltungswissenschaften Speyer",
+  "category": "TEACHING",
+  "subcategory": "University Lehrauftrag",
+  "description": "The university's own regulation on Lehrauftrag compensation, in force for assignments carried out from 1 April 2022. It sets a single rate per taught unit and a separate rate for marking examination scripts. A course normally needs five enrolled attendees before it is payable. The institution publishes this rate in its own regulation. The page does not advertise a specific open assignment, and whether one is currently available is not stated - that is a question for the faculty.",
+  "summary": "31 Euro per taught unit. Note that the unit is 45 minutes, not a clock hour, and the rate covers preparation.",
+  "compensation_min_minor": 3100,
+  "compensation_max_minor": 3100,
+  "compensation_basis": "PER_HOUR",
+  "compensation_period": "IRREGULAR",
+  "source_excerpt": "3.2 Jede tatsaechlich durchgefuehrte Einzelstunde (45 Minuten) wird mit 31 Euro verguetet. Eine verguetungsfaehige Lehrveranstaltung setzt in der Regel die Belegung der Veranstaltung durch fuenf Hoererinnen und Hoerer voraus. 3.3 Vorgeschriebene oder beauftragte Klausuren werden mit 9 Euro pro korrigiertem Exemplar verguetet.",
+  "eligibility_text": "Selbstaendige Lehrauftraege duerfen nur an Personen erteilt werden, welche mindestens die Voraussetzungen des Paragraf 40 Abs. 1 Nr. 1 und 2 DUVwG (abgeschlossenes Studium an einer Universitaet oder vergleichbaren Hochschule sowie paedagogische Eignung) oder des Paragraf 40 Abs. 3 DUVwG (hervorragende fachbezogene Leistung in der Praxis und paedagogische Eignung) erfuellen.",
+  "eligibility_structured": [
+    {
+      "label": "Completed university degree, or outstanding subject-related practical achievement",
+      "strength": "HARD",
+      "source_text": "abgeschlossenes Studium an einer Universitaet oder vergleichbaren Hochschule ... oder hervorragende fachbezogene Leistung in der Praxis"
+    },
+    {
+      "label": "Pedagogical aptitude, normally shown by teaching or training experience",
+      "strength": "HARD",
+      "source_text": "paedagogische Eignung, die in der Regel durch Erfahrung in der Lehre, der Ausbildung oder entsprechende Weiterbildung nachgewiesen wird"
+    },
+    {
+      "label": "Not already employed by the university in the same subject area",
+      "strength": "HARD",
+      "source_text": "Lehrauftraege duerfen nicht an Personen fuer Lehrveranstaltungen im Rahmen ihrer Dienstaufgaben an der Universitaet vergeben werden"
+    }
+  ],
+  "source_url": "https://www.uni-speyer.de/fileadmin/Universitaet/Rechtsgrundlagen/Lehrauftragsverguetung-1.pdf"
+}

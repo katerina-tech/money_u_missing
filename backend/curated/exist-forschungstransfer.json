@@ -1,0 +1,43 @@
+{
+  "id": "curated-exist-forschungstransfer",
+  "title": "EXIST-Forschungstransfer",
+  "organization": "EXIST - Existenzgründungen aus der Wissenschaft (BMWE)",
+  "category": "PAID_PROGRAM",
+  "subcategory": "Federal research-transfer funding",
+  "description": "Federal support for research-based startups of high technical complexity with an existing proof of principle. Provides financial support alongside mentoring, access to university infrastructure and networking. A connection to a university or research institution is required.",
+  "summary": "Federal funding for development-intensive, research-based startups. The programme page does not publish the funding amounts or the phase structure.",
+  "country": "DE",
+  "remote_type": "UNKNOWN",
+  "required_skills": [],
+  "required_languages": [
+    {
+      "code": "de",
+      "minimum": "UNKNOWN",
+      "strength": "UNKNOWN"
+    }
+  ],
+  "employment_type": "GRANT_FUNDED",
+  "compensation_min_minor": null,
+  "compensation_max_minor": null,
+  "compensation_basis": "UNKNOWN",
+  "compensation_period": "UNKNOWN",
+  "tax_treatment": "UNKNOWN",
+  "compensation_verified": false,
+  "estimated_hours_min": null,
+  "estimated_hours_max": null,
+  "deadline": null,
+  "eligibility_text": "Besonders entwicklungsintensive Gründungsvorhaben mit vorhandenem Proof of Principle und Anbindung an eine Hochschule oder Forschungseinrichtung.",
+  "eligibility_structured": [
+    {
+      "label": "Existing proof of principle",
+      "strength": "HARD"
+    },
+    {
+      "label": "Connection to a university or research institution",
+      "strength": "HARD"
+    }
+  ],
+  "source_url": "https://www.exist.de/EXIST/Navigation/DE/Gruendungsfoerderung/EXIST-Forschungstransfer/exist-forschungstransfer.html",
+  "evidence_confidence": "SOURCE_BACKED",
+  "last_verified_at": "2026-09-04T14:20:32.164196+00:00"
+}
