@@ -19,7 +19,6 @@ import {
   LinkButton,
   Notice,
   Page,
-  ProgressBar,
   Section,
   Skeleton,
   Spinner,
@@ -28,13 +27,19 @@ import {
 import { ApiError, api } from "@/lib/api";
 import { copy } from "@/lib/copy";
 import { formatMinor } from "@/lib/format";
-import type { MoneyMap } from "@/lib/types";
+import type { Application, MoneyMap } from "@/lib/types";
 
 import { DismissDialog } from "../_components/DismissDialog";
 import { FeedbackPrompt } from "../_components/FeedbackPrompt";
+import { MoneyJourney } from "../_components/MoneyJourney";
 
 export default function DashboardPage() {
   const [map, setMap] = useState<MoneyMap | null>(null);
+  // Fed to the journey band so each stage can list what is actually in it.
+  // Failing to load it costs the lists, not the page.
+  const [applications, setApplications] = useState<Application[] | null>(null);
+  // The keep side of the band. Optional: a failure hides the count, not the band.
+  const [leakCount, setLeakCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,10 +50,14 @@ export default function DashboardPage() {
       setMap(await api.moneyMap());
       setError(null);
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : copy.errors.generic);
+      setError(
+        caught instanceof ApiError ? caught.message : copy.errors.generic,
+      );
     } finally {
       setLoading(false);
     }
+    setApplications(await api.applications().catch(() => null));
+    setLeakCount((await api.leaks().catch(() => null))?.total ?? null);
   }, []);
 
   useEffect(() => {
@@ -62,9 +71,13 @@ export default function DashboardPage() {
       setMap(await api.refreshMoneyMap());
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 409) {
-        setError("Confirm your profile before we search. Nothing extracted is used until you have checked it.");
+        setError(
+          "Confirm your profile before we search. Nothing extracted is used until you have checked it.",
+        );
       } else {
-        setError(caught instanceof ApiError ? caught.message : copy.errors.generic);
+        setError(
+          caught instanceof ApiError ? caught.message : copy.errors.generic,
+        );
       }
     } finally {
       setRefreshing(false);
@@ -105,6 +118,13 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
+      {/* --------------------------------------------------- A to B, the band */}
+      <MoneyJourney
+        map={map}
+        applications={applications}
+        leakCount={leakCount}
+      />
+
       {/* ------------------------------------------------------- the money */}
       <Card className="mb-8">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -115,11 +135,18 @@ export default function DashboardPage() {
                 ? "Not set"
                 : `${formatMinor(map.goal_monthly_minor, map.currency)}/month`
             }
-            detail={map.goal_monthly_minor === null ? "Set one in your profile" : "Additional income"}
+            detail={
+              map.goal_monthly_minor === null
+                ? "Set one in your profile"
+                : "Additional income"
+            }
           />
           <Stat
             label={copy.money.secured}
-            value={formatMinor(summary.secured_monthly_minor + summary.secured_one_time_minor, map.currency)}
+            value={formatMinor(
+              summary.secured_monthly_minor + summary.secured_one_time_minor,
+              map.currency,
+            )}
             detail={`${summary.secured_count} confirmed`}
           />
           <Stat
@@ -138,13 +165,9 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div className="mt-6 border-t border-rule pt-5">
-          <ProgressBar
-            ratio={map.goal_progress_ratio}
-            label="Progress towards your monthly goal"
-            explainer={copy.money.progressExplainer}
-          />
-        </div>
+        {/* The goal bar used to sit here. It now lives in the A-to-B band
+            above, which owns the goal narrative end to end - two progress bars
+            making the same promise on one page is how the two drift apart. */}
 
         {/* The potential figures, kept visually distinct from the committed
             ones above, and never summed with them. */}
@@ -200,7 +223,9 @@ export default function DashboardPage() {
             <p className="eyebrow mb-3 text-cobalt">Best next move</p>
             <h2 className="text-2xl">{map.best_next_move.title}</h2>
             {map.best_next_move.organization ? (
-              <p className="mt-1 text-sm text-ink-muted">{map.best_next_move.organization}</p>
+              <p className="mt-1 text-sm text-ink-muted">
+                {map.best_next_move.organization}
+              </p>
             ) : null}
             {map.best_next_move.reasons.length > 0 ? (
               <>
@@ -218,10 +243,14 @@ export default function DashboardPage() {
               </>
             ) : null}
             {map.best_next_move.caveat ? (
-              <p className="mt-4 text-xs text-ink-faint">{map.best_next_move.caveat}</p>
+              <p className="mt-4 text-xs text-ink-faint">
+                {map.best_next_move.caveat}
+              </p>
             ) : null}
             <div className="mt-6">
-              <LinkButton href={`/opportunities/${map.best_next_move.opportunity_id}`}>
+              <LinkButton
+                href={`/opportunities/${map.best_next_move.opportunity_id}`}
+              >
                 View opportunity
               </LinkButton>
             </div>
@@ -293,7 +322,10 @@ export default function DashboardPage() {
 
         {map.opportunities.length > 8 ? (
           <p className="mt-4 text-sm">
-            <Link href="/opportunities" className="text-cobalt underline underline-offset-4">
+            <Link
+              href="/opportunities"
+              className="text-cobalt underline underline-offset-4"
+            >
               See all {map.opportunities.length} opportunities
             </Link>
           </p>
@@ -311,9 +343,15 @@ export default function DashboardPage() {
               ["Duplicates merged", map.diagnostics.duplicates_removed],
               ["Expired or stale", map.diagnostics.stale_removed],
               ["Blocked as unsafe", map.diagnostics.blocked_unsafe],
-              ["Blocked as prompt injection", map.diagnostics.blocked_injection],
+              [
+                "Blocked as prompt injection",
+                map.diagnostics.blocked_injection,
+              ],
               ["Sources queried", map.diagnostics.sources_queried],
-              ["Live web search", map.diagnostics.live_search_used ? "used" : "not configured"],
+              [
+                "Live web search",
+                map.diagnostics.live_search_used ? "used" : "not configured",
+              ],
             ].map(([term, value]) => (
               <div key={String(term)}>
                 <dt className="text-ink-faint">{term}</dt>
@@ -329,7 +367,10 @@ export default function DashboardPage() {
           {map.diagnostics.queries.length > 0 ? (
             <ul className="mt-2 space-y-1">
               {map.diagnostics.queries.map((query) => (
-                <li key={query} className="font-mono text-[11px] text-ink-faint">
+                <li
+                  key={query}
+                  className="font-mono text-[11px] text-ink-faint"
+                >
                   {query}
                 </li>
               ))}
@@ -340,18 +381,26 @@ export default function DashboardPage() {
 
       {/* --------------------------------------------------- income paths */}
       {map.income_paths.length > 0 ? (
-        <Section title="Income paths" description="Where the opportunities cluster.">
+        <Section
+          title="Income paths"
+          description="Where the opportunities cluster."
+        >
           <ul className="grid gap-px overflow-hidden rounded-[--radius-card] border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-3">
             {map.income_paths.map((path) => (
               <li key={path.category} className="bg-paper-raised p-4">
                 <p className="text-sm font-medium">{path.label}</p>
                 <p className="mt-1 text-xs text-ink-faint">
-                  {path.opportunity_count} opportunit{path.opportunity_count === 1 ? "y" : "ies"}
-                  {path.best_match_score ? ` · best match ${path.best_match_score}%` : ""}
+                  {path.opportunity_count} opportunit
+                  {path.opportunity_count === 1 ? "y" : "ies"}
+                  {path.best_match_score
+                    ? ` · best match ${path.best_match_score}%`
+                    : ""}
                 </p>
                 {path.indicative_monthly_minor !== null ? (
                   <p className="tnum mt-2 text-sm">
-                    up to {formatMinor(path.indicative_monthly_minor, map.currency)}/month
+                    up to{" "}
+                    {formatMinor(path.indicative_monthly_minor, map.currency)}
+                    /month
                   </p>
                 ) : (
                   <p className="mt-2 text-xs italic text-ink-faint">
@@ -370,13 +419,18 @@ export default function DashboardPage() {
           {map.this_week.length > 0 ? (
             <ul className="space-y-2">
               {map.this_week.map((line) => (
-                <li key={line} className="rounded-[4px] border border-rule bg-paper-raised p-3 text-sm">
+                <li
+                  key={line}
+                  className="rounded-[4px] border border-rule bg-paper-raised p-3 text-sm"
+                >
                   {line}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-ink-muted">Nothing closes in the next seven days.</p>
+            <p className="text-sm text-ink-muted">
+              Nothing closes in the next seven days.
+            </p>
           )}
         </Section>
 
@@ -384,20 +438,26 @@ export default function DashboardPage() {
           {map.recent_progress.length > 0 ? (
             <ul className="space-y-2">
               {map.recent_progress.map((line) => (
-                <li key={line} className="rounded-[4px] border border-rule bg-paper-raised p-3 text-sm">
+                <li
+                  key={line}
+                  className="rounded-[4px] border border-rule bg-paper-raised p-3 text-sm"
+                >
                   {line}
                 </li>
               ))}
             </ul>
           ) : (
             <p className="text-sm text-ink-muted">
-              Save an opportunity to start tracking it from potential through to earned.
+              Save an opportunity to start tracking it from potential through to
+              earned.
             </p>
           )}
         </Section>
       </div>
 
-      {hasOpportunities ? <FeedbackPrompt question="would_not_have_found" /> : null}
+      {hasOpportunities ? (
+        <FeedbackPrompt question="would_not_have_found" />
+      ) : null}
 
       {dismissing ? (
         <DismissDialog
