@@ -110,7 +110,7 @@ generic international aggregator cannot serve this user.
 *Say:* the two in-product questions and the dismiss-reason taxonomy are how we
 learn *which part* is wrong — sources, matching, or discovery.
 
-*Also say:* the honest blocker. The curated dataset holds two real
+*Also say:* the honest blocker. The curated dataset holds seven real
 opportunities. Until it holds thirty, H1 is untestable, and running a study
 before then would produce a confident number about nothing. That is week one.
 
@@ -133,12 +133,13 @@ H1.
 ## Appendix slides to have ready
 
 - **Architecture** — the AI/deterministic split table from `ARCHITECTURE.md`.
-- **Provenance** — the two real records with null compensation. The most
-  persuasive slide in the deck, because it shows discipline rather than claiming
-  it.
+- **Provenance** — the two federal programmes with null compensation, next to
+  the five teaching records whose rates are quoted verbatim from the published
+  regulation. The contrast is the slide: we publish a figure when the source
+  publishes one, and not otherwise. A validator enforces it.
 - **Security** — the five-layer injection defence, and the SSRF re-validation on
   every redirect hop.
-- **Testing** — 180 + 25 + 9 + 42, none of which makes a paid model call.
+- **Testing** — 244 + 25 + 12 + 42, none of which makes a paid model call.
 - **Regulatory boundaries** — how each line is enforced structurally.
 
 ## Questions to expect
@@ -155,5 +156,7 @@ Python. The model reads and phrases. Show the table.
 next, licensed search after that. Show the provenance doc, including the two
 feeds that failed verification and ship disabled.
 
-**"Two real opportunities?"** Yes, and that is the number. Each one means a
-person read a page. Scaling it is P1 and the pipeline is built and tested.
+**"Only seven real opportunities?"** Yes, and that is the number. Each one
+means a person read a page. Scaling it is P1: the records are now one JSON file
+each rather than a Python literal, and `check` refuses any figure that is not
+quoted from its source.

@@ -82,7 +82,7 @@ Measured on this build, 2026-09-04:
 | Source verification rate | 2/16 (the two curated records; the rest are demo) |
 
 The source verification rate is low and that is the honest number: the corpus is
-two real programmes. It is the metric that must move first.
+seven real records. It is the metric that must move first.
 
 ---
 

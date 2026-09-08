@@ -50,7 +50,14 @@ next action — then tracked from potential through applied to actually paid.
 
 ## Product
 
-Three layers, weighted roughly 70/20/10:
+Two directions to the same goal, weighted roughly 70/30 - and one boundary.
+**Earn** finds income you are not making. **Keep** finds money already
+passing you by: a cost you never recorded, an allowance nobody mentioned, a
+threshold you are about to cross. Keep is deliberately *not* a comparison
+site for tariffs or insurance - that needs a § 34d GewO permission and its
+only proven model is commission from the provider being recommended.
+
+Three layers underneath, weighted roughly 70/20/10:
 
 - **EARN** — discover, match, prioritise, act, track. The product.
 - **KEEP** — source-backed German tax and administrative context, attached to
@@ -116,7 +123,7 @@ discovery pipeline · pluggable opportunity sources and search providers ·
 five-layer prompt-injection defence · BM25 retrieval with German umlaut folding
 and compound expansion.
 
-**Runs with zero credentials.** 180 backend tests, 25 frontend tests, 9 e2e
+**Runs with zero credentials.** 244 backend tests, 25 frontend tests, 12 e2e
 tests, 42 AI evaluation cases — none of which makes a paid model call.
 `mypy --strict` clean.
 
@@ -133,7 +140,8 @@ Not the AI. Four things that compound, none of which we have yet:
    specific.
 
 **Stated as strategy, not as achievement.** Today the opportunity graph holds
-two real records.
+seven real records, and a build-breaking rule that a figure on any of them must
+be quoted from the page that published it.
 
 ## Validation
 
@@ -150,7 +158,7 @@ a feedback table, a dismiss-reason taxonomy, and a defined metric set. See
 deterministic matching, actionability, opportunity detail, action tracking,
 Germany check, RAG, feedback, analytics, demo, landing page.
 
-**P1 (next).** Expand the curated dataset to ~30 real opportunities; enable one
+**P1 (next).** Expand the curated dataset from seven to ~30 real opportunities; enable one
 verified live source; scheduled refresh and email alerts; demo cleanup;
 subscription behind the existing flag.
 
@@ -169,5 +177,6 @@ here.
 ---
 
 *Status: validation-stage MVP. Demo data is labelled DEMO throughout. The
-curated dataset holds two real programmes, both with null compensation, because
-their pages do not state the amounts.*
+curated dataset holds seven real records: two federal programmes whose pages
+state no amount, and five teaching rates quoted verbatim from the institutions'
+own published regulations.*

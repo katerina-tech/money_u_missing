@@ -91,7 +91,7 @@ python scripts/tasks.py dev       # or: make dev
 Then open <http://localhost:3000> and click **Build my Money Map**.
 
 **No API keys are required.** With an empty `.env` you get: the full product,
-14 demo opportunities plus 2 real curated programmes, deterministic matching and
+14 demo opportunities plus 7 real curated records, deterministic matching and
 actionability, the Germany check with citations, the German knowledge corpus
 with lexical retrieval, all calculators, tracking, and the complete test and
 evaluation suites.
@@ -347,7 +347,7 @@ Every one is optional. See `.env.example` for the annotated list.
 Stated plainly, because a limitations section that lists only comfortable
 problems is worse than none.
 
-1. **Two real opportunities.** The curated dataset holds two verified
+1. **Seven real opportunities.** The curated dataset holds seven verified
    programmes. Everything else is demo data. The pipeline that would ingest more
    is built and tested; the corpus is small because each entry means a person
    read a page.

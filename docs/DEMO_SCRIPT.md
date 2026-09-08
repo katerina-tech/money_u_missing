@@ -149,7 +149,7 @@ Show the reduced-mode banner.
 python scripts/tasks.py check
 ```
 
-> "180 backend tests, 25 frontend, 9 end-to-end, 42 evaluation cases, mypy
+> "244 backend tests, 25 frontend, 12 end-to-end, 42 evaluation cases, mypy
 > strict. Nothing makes a paid model call, which is why it's reasonable to run
 > on every commit.
 >
@@ -163,9 +163,11 @@ python scripts/tasks.py check
 
 **"How do you get more opportunities?"**
 > Curated first — a person reads a page. Then verified feeds and public APIs,
-> then licensed search. We have two real records today. Getting to thirty is
-> week one, and until we do, our main hypothesis isn't testable. The pipeline is
-> built and tested.
+> then licensed search. We have seven real records today, and adding one is
+> editing a data file rather than editing Python. Getting to thirty is week one,
+> and until we do, our main hypothesis isn't testable. The pipeline is built,
+> tested, and gated: `validate_curated.py` fails the build if a compensation
+> figure is not quoted from the page it came from.
 
 **"Isn't this just a ChatGPT wrapper?"**
 > Show the split table. Every decision is deterministic Python. A wrapper can't

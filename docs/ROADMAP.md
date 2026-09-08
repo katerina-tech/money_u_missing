@@ -30,17 +30,21 @@ If not, it was not P0.
 | Feedback instrument and analytics with a property allowlist | Done |
 | Demo mode with a fictional professional | Done |
 | Landing page, privacy, about, pricing | Done |
-| 180 + 25 + 9 tests, 42 evals, `mypy --strict` | Done |
+| Personal page: baseline income (gross/net kept apart), recorded costs, household context | Done |
+| KEEP direction: deterministic "money you may be losing" findings, each cited or silent | Done |
 | Docker, Railway configs, health checks | Done |
+| 244 + 25 + 12 tests, 42 evals, curated-data gate | Done |
 
 ### P0 gaps, honestly
 
 These are P0 in spirit and not finished:
 
-1. **The curated dataset holds two opportunities.** The pipeline is built and
-   tested; the corpus is small because each entry means a person read a page.
-   **This is the single most important thing to fix**, because H1 is untestable
-   without it.
+1. **The curated dataset holds seven opportunities.** The pipeline is built,
+   tested and gated; the corpus is small because each entry means a person read
+   a page. **This is still the single most important thing to fix**, because H1
+   is untestable without it. What changed: records are one JSON file each rather
+   than a Python literal, and `scripts/validate_curated.py` fails the build if a
+   compensation figure is not quoted from its source page.
 2. **No live source is enabled.** Both candidate RSS feeds failed verification —
    one 404s, one is a JavaScript shell. Live discovery needs either a working
    feed or a search API key.
@@ -53,8 +57,9 @@ These are P0 in spirit and not finished:
 
 Ordered by what unblocks validation first.
 
-1. **Expand the curated dataset to ~30 real opportunities.** Manual, deliberate,
-   with a source URL and a read date for each. Nothing else in P1 matters more.
+1. **Expand the curated dataset from seven to ~30 real opportunities.** Manual,
+   deliberate, with a source URL, a read date and a quoted excerpt for each.
+   Nothing else in P1 matters more.
 2. **Enable one verified live source.** Candidates: a working public funding
    feed, a university Lehrauftrag portal with a documented API, or a licensed
    search key. Each needs a recorded access basis before it ships.
