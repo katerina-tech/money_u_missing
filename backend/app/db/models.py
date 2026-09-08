@@ -160,6 +160,16 @@ class Profile(Base, TimestampMixin):
     knows_employer_rules: Mapped[str] = mapped_column(String(16), default="UNKNOWN")
     receives_employment_benefits: Mapped[str] = mapped_column(String(24), default="UNKNOWN")
 
+    # Household context. Explicit disclosure only, never inferred from a CV, a
+    # career gap, an age or anything else. It exists to decide which questions
+    # are worth raising, never to compute anyone's position.
+    has_children: Mapped[str] = mapped_column(String(24), default="UNKNOWN")
+    jointly_assessed: Mapped[str] = mapped_column(String(24), default="UNKNOWN")
+    #: Ages and parent-chosen labels only. Deliberately no names and no dates of
+    #: birth: the questions this product raises do not need them, and a child's
+    #: personal data is not collected speculatively.
+    children: Mapped[dict[str, Any]] = mapped_column(JsonDict, default=dict)
+
     confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
     confirmed_at: Mapped[datetime | None] = mapped_column(UtcDateTime, default=None)
 
@@ -519,6 +529,83 @@ class IncomeEvent(Base):
     __table_args__ = (
         CheckConstraint("money_state IN ('SECURED','EARNED')", name="ck_income_is_committed"),
         Index("ix_income_user_date", "user_id", "occurred_on"),
+    )
+
+
+class BaselineIncomeRow(Base, TimestampMixin):
+    """Income the user already had before this product existed.
+
+    Kept apart from ``income_events``, which is money this product helped find.
+    Mixing them would let a salary inflate the "earned" figure on the Money Map
+    and make the product look like it had produced income it had nothing to do
+    with - the single most flattering lie available to it.
+
+    ``basis`` records whether the amount is gross or net. There is no column for
+    "the other one" because nothing in this system converts between them.
+    """
+
+    __tablename__ = "baseline_incomes"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    label: Mapped[str] = mapped_column(String(160))
+    amount_minor: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(3), default="EUR")
+    basis: Mapped[str] = mapped_column(String(16), default="UNKNOWN")
+    period: Mapped[str] = mapped_column(String(16), default="RECURRING")
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False)
+    started_on: Mapped[date | None] = mapped_column(Date, default=None)
+
+    __table_args__ = (
+        CheckConstraint("basis IN ('GROSS','NET','UNKNOWN')", name="ck_baseline_basis"),
+        CheckConstraint("amount_minor >= 0", name="ck_baseline_amount_non_negative"),
+    )
+
+
+class ExpenseRow(Base, TimestampMixin):
+    """A cost the user recorded against an income they are pursuing.
+
+    Note what this table does *not* have: no deductible flag, no tax rate, no
+    saved-tax column. Whether a cost reduces someone's tax is a question for
+    their Finanzamt, and a column here would be this product answering it.
+    The rows are the user's own records; the product adds them up and produces
+    questions.
+    """
+
+    __tablename__ = "expenses"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    #: What the cost was for. At most one of these is set - an expense belongs
+    #: to a stream or to an application, never to both.
+    income_stream_id: Mapped[str | None] = mapped_column(
+        ForeignKey("income_streams.id", ondelete="SET NULL"), default=None
+    )
+    application_id: Mapped[str | None] = mapped_column(
+        ForeignKey("applications.id", ondelete="SET NULL"), default=None, index=True
+    )
+    label: Mapped[str] = mapped_column(String(200))
+    amount_minor: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(3), default="EUR")
+    category: Mapped[str] = mapped_column(String(40), default="OTHER", index=True)
+    incurred_on: Mapped[date] = mapped_column(Date, index=True)
+    has_receipt: Mapped[str] = mapped_column(String(16), default="UNKNOWN")
+    #: The user's own statement that the cost was partly private. Stored as
+    #: given and never turned into a percentage by this product.
+    partly_private: Mapped[str] = mapped_column(String(16), default="UNKNOWN")
+    notes: Mapped[str | None] = mapped_column(Text, default=None)
+
+    __table_args__ = (
+        CheckConstraint("amount_minor >= 0", name="ck_expense_amount_non_negative"),
+        CheckConstraint(
+            "income_stream_id IS NULL OR application_id IS NULL",
+            name="ck_expense_has_one_parent",
+        ),
+        Index("ix_expense_user_date", "user_id", "incurred_on"),
     )
 
 

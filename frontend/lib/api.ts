@@ -12,14 +12,19 @@
 
 import type {
   Application,
+  BaselineIncome,
   Capabilities,
   ChildGoal,
+  Expense,
   Goal,
+  Household,
+  LeaksResponse,
   LegalFact,
   MoneyMap,
   OpportunityDetail,
   OpportunitySummary,
   OwnershipCard,
+  PersonalOverview,
   Profile,
   ProfileDraftResponse,
   Projection,
@@ -29,7 +34,8 @@ import type {
 } from "./types";
 
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
+  "http://localhost:8000";
 
 const ACCESS_KEY = "mym.access";
 const REFRESH_KEY = "mym.refresh";
@@ -57,7 +63,8 @@ export class ApiError extends Error {
 
 export const tokens = {
   read(): { access: string | null; refresh: string | null; isDemo: boolean } {
-    if (typeof window === "undefined") return { access: null, refresh: null, isDemo: false };
+    if (typeof window === "undefined")
+      return { access: null, refresh: null, isDemo: false };
     return {
       access: sessionStorage.getItem(ACCESS_KEY),
       refresh: sessionStorage.getItem(REFRESH_KEY),
@@ -92,13 +99,17 @@ interface RequestOptions {
   retried?: boolean;
 }
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const { method = "GET", body, auth = true, retried = false } = options;
   const headers: Record<string, string> = {};
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const stored = tokens.read();
-  if (auth && stored.access) headers["Authorization"] = `Bearer ${stored.access}`;
+  if (auth && stored.access)
+    headers["Authorization"] = `Bearer ${stored.access}`;
 
   let response: Response;
   try {
@@ -162,8 +173,10 @@ async function refreshSession(refreshToken: string): Promise<boolean> {
 
 export const api = {
   // --- meta
-  capabilities: () => request<Capabilities>("/api/capabilities", { auth: false }),
-  provenance: () => request<SourceProvenance[]>("/api/provenance", { auth: false }),
+  capabilities: () =>
+    request<Capabilities>("/api/capabilities", { auth: false }),
+  provenance: () =>
+    request<SourceProvenance[]>("/api/provenance", { auth: false }),
   health: () => request<{ status: string }>("/api/health", { auth: false }),
 
   // --- identity
@@ -186,7 +199,10 @@ export const api = {
     return result;
   },
   async startDemo(): Promise<Tokens> {
-    const result = await request<Tokens>("/api/demo/session", { method: "POST", auth: false });
+    const result = await request<Tokens>("/api/demo/session", {
+      method: "POST",
+      auth: false,
+    });
     tokens.write(result);
     return result;
   },
@@ -197,7 +213,10 @@ export const api = {
       tokens.clear();
     }
   },
-  me: () => request<{ user_id: string; email: string; is_demo: boolean }>("/api/auth/me"),
+  me: () =>
+    request<{ user_id: string; email: string; is_demo: boolean }>(
+      "/api/auth/me",
+    ),
   exportData: () => request<Record<string, unknown>>("/api/auth/export"),
   deleteAccount: async (): Promise<void> => {
     await request<void>("/api/auth/account", { method: "DELETE" });
@@ -208,7 +227,8 @@ export const api = {
   profile: () => request<Profile>("/api/profile"),
   saveProfile: (profile: Profile) =>
     request<Profile>("/api/profile", { method: "PUT", body: profile }),
-  confirmProfile: () => request<Profile>("/api/profile/confirm", { method: "POST" }),
+  confirmProfile: () =>
+    request<Profile>("/api/profile/confirm", { method: "POST" }),
   pasteCv: (text: string) =>
     request<ProfileDraftResponse>("/api/profile/cv/paste", {
       method: "POST",
@@ -221,7 +241,9 @@ export const api = {
     const stored = tokens.read();
     const response = await fetch(`${API_BASE}/api/profile/cv/upload`, {
       method: "POST",
-      headers: stored.access ? { Authorization: `Bearer ${stored.access}` } : {},
+      headers: stored.access
+        ? { Authorization: `Bearer ${stored.access}` }
+        : {},
       body: form,
     });
     const payload = await response.json().catch(() => null);
@@ -249,13 +271,19 @@ export const api = {
       }[]
     >("/api/profile/cv"),
   consents: () =>
-    request<{ purpose: string; statement: string; granted_at: string; withdrawn_at: string | null }[]>(
-      "/api/profile/consents",
-    ),
+    request<
+      {
+        purpose: string;
+        statement: string;
+        granted_at: string;
+        withdrawn_at: string | null;
+      }[]
+    >("/api/profile/consents"),
 
   // --- money map and opportunities
   moneyMap: () => request<MoneyMap>("/api/money-map"),
-  refreshMoneyMap: () => request<MoneyMap>("/api/money-map/refresh", { method: "POST" }),
+  refreshMoneyMap: () =>
+    request<MoneyMap>("/api/money-map/refresh", { method: "POST" }),
   opportunities: (params: { savedOnly?: boolean; minScore?: number } = {}) => {
     const query = new URLSearchParams();
     if (params.savedOnly) query.set("saved_only", "true");
@@ -263,8 +291,10 @@ export const api = {
     const suffix = query.toString() ? `?${query}` : "";
     return request<OpportunitySummary[]>(`/api/opportunities${suffix}`);
   },
-  opportunity: (id: string) => request<OpportunityDetail>(`/api/opportunities/${id}`),
-  save: (id: string) => request<Application>(`/api/opportunities/${id}/save`, { method: "POST" }),
+  opportunity: (id: string) =>
+    request<OpportunityDetail>(`/api/opportunities/${id}`),
+  save: (id: string) =>
+    request<Application>(`/api/opportunities/${id}/save`, { method: "POST" }),
   dismiss: (id: string, reason: string, note?: string) =>
     request<void>(`/api/opportunities/${id}/dismiss`, {
       method: "POST",
@@ -275,17 +305,23 @@ export const api = {
   applications: () => request<Application[]>("/api/applications"),
   application: (id: string) => request<Application>(`/api/applications/${id}`),
   updateWorkspace: (id: string, patch: Record<string, unknown>) =>
-    request<Application>(`/api/applications/${id}`, { method: "PATCH", body: patch }),
+    request<Application>(`/api/applications/${id}`, {
+      method: "PATCH",
+      body: patch,
+    }),
   transition: (id: string, status: string, outcome?: Record<string, unknown>) =>
     request<Application>(`/api/applications/${id}/status`, {
       method: "POST",
       body: { status, outcome: outcome ?? null },
     }),
   draft: (id: string, kind: string) =>
-    request<{ kind: string; text: string; note: string }>(`/api/applications/${id}/draft`, {
-      method: "POST",
-      body: { kind },
-    }),
+    request<{ kind: string; text: string; note: string }>(
+      `/api/applications/${id}/draft`,
+      {
+        method: "POST",
+        body: { kind },
+      },
+    ),
   income: () =>
     request<
       {
@@ -303,30 +339,61 @@ export const api = {
   askTax: (question: string) =>
     request<TaxAnswer>("/api/tax/ask", { method: "POST", body: { question } }),
   legalFacts: () => request<LegalFact[]>("/api/tax/facts", { auth: false }),
-  knowledgeStatus: () => request<Record<string, unknown>>("/api/tax/status", { auth: false }),
+  knowledgeStatus: () =>
+    request<Record<string, unknown>>("/api/tax/status", { auth: false }),
 
   // --- grow and family
   goals: () => request<Goal[]>("/api/goals"),
   createGoal: (goal: Record<string, unknown>) =>
     request<Goal>("/api/goals", { method: "POST", body: goal }),
-  deleteGoal: (id: string) => request<void>(`/api/goals/${id}`, { method: "DELETE" }),
+  deleteGoal: (id: string) =>
+    request<void>(`/api/goals/${id}`, { method: "DELETE" }),
   project: (input: {
     initial_minor: number;
     monthly_contribution_minor: number;
     annual_return: number;
     months: number;
     annual_inflation?: number | null;
-  }) => request<Projection>("/api/grow/project", { method: "POST", auth: false, body: input }),
+  }) =>
+    request<Projection>("/api/grow/project", {
+      method: "POST",
+      auth: false,
+      body: input,
+    }),
   etfEducation: () =>
-    request<{ disclaimer: string; terms: { term: string; explanation: string }[] }>(
-      "/api/grow/etf-education",
-      { auth: false },
-    ),
+    request<{
+      disclaimer: string;
+      terms: { term: string; explanation: string }[];
+    }>("/api/grow/etf-education", { auth: false }),
   childGoals: () => request<ChildGoal[]>("/api/family/goals"),
   createChildGoal: (goal: Record<string, unknown>) =>
     request<ChildGoal>("/api/family/goals", { method: "POST", body: goal }),
-  deleteChildGoal: (id: string) => request<void>(`/api/family/goals/${id}`, { method: "DELETE" }),
-  ownership: () => request<OwnershipCard>("/api/family/ownership", { auth: false }),
+  deleteChildGoal: (id: string) =>
+    request<void>(`/api/family/goals/${id}`, { method: "DELETE" }),
+  ownership: () =>
+    request<OwnershipCard>("/api/family/ownership", { auth: false }),
+
+  // --- personal money
+  personalOverview: () => request<PersonalOverview>("/api/personal/overview"),
+  leaks: () => request<LeaksResponse>("/api/personal/leaks"),
+  baselineIncome: () => request<BaselineIncome[]>("/api/personal/income"),
+  addBaselineIncome: (entry: Record<string, unknown>) =>
+    request<BaselineIncome>("/api/personal/income", {
+      method: "POST",
+      body: entry,
+    }),
+  deleteBaselineIncome: (id: string) =>
+    request<void>(`/api/personal/income/${id}`, { method: "DELETE" }),
+  expenses: () => request<Expense[]>("/api/personal/expenses"),
+  addExpense: (entry: Record<string, unknown>) =>
+    request<Expense>("/api/personal/expenses", { method: "POST", body: entry }),
+  deleteExpense: (id: string) =>
+    request<void>(`/api/personal/expenses/${id}`, { method: "DELETE" }),
+  setHousehold: (payload: Record<string, unknown>) =>
+    request<Household>("/api/personal/household", {
+      method: "PUT",
+      body: payload,
+    }),
 
   // --- validation
   feedback: (payload: {
@@ -335,9 +402,12 @@ export const api = {
     reason?: string | null;
     note?: string | null;
     opportunity_id?: string | null;
-  }) => request<{ id: string }>("/api/feedback", { method: "POST", body: payload }),
+  }) =>
+    request<{ id: string }>("/api/feedback", { method: "POST", body: payload }),
   preferences: () => request<Record<string, unknown>>("/api/preferences"),
-  resetPreferences: () => request<void>("/api/preferences", { method: "DELETE" }),
+  resetPreferences: () =>
+    request<void>("/api/preferences", { method: "DELETE" }),
   outcomes: () => request<Record<string, unknown>>("/api/outcomes"),
-  metrics: () => request<Record<string, unknown>>("/api/metrics", { auth: false }),
+  metrics: () =>
+    request<Record<string, unknown>>("/api/metrics", { auth: false }),
 };

@@ -25,6 +25,7 @@ const NAV = [
   { href: "/dashboard", label: copy.nav.moneyMap },
   { href: "/opportunities", label: copy.nav.opportunities },
   { href: "/actions", label: copy.nav.actions },
+  { href: "/personal", label: copy.nav.personal },
   { href: "/tax", label: copy.nav.tax },
   { href: "/grow", label: copy.nav.grow },
   { href: "/family", label: copy.nav.family },
@@ -45,7 +46,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
     setIsDemo(tokens.read().isDemo);
     setReady(true);
-    api.capabilities().then(setCapabilities).catch(() => undefined);
+    api
+      .capabilities()
+      .then(setCapabilities)
+      .catch(() => undefined);
   }, [router]);
 
   useEffect(() => {
@@ -64,8 +68,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col">
       {isDemo ? (
         <div className="bg-demo px-5 py-2 text-center text-[13px] font-medium text-white">
-          Demo session · a fictional professional, fictional opportunities. Nothing here is a
-          real offer.
+          Demo session · a fictional professional, fictional opportunities.
+          Nothing here is a real offer.
         </div>
       ) : null}
 
@@ -73,7 +77,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
           <Logo href="/dashboard" compact />
 
-          <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
+          <nav
+            aria-label="Primary"
+            className="hidden items-center gap-1 lg:flex"
+          >
             {NAV.map((item) => {
               const active = pathname.startsWith(item.href);
               return (
@@ -125,18 +132,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             className="border-t border-rule bg-paper-raised lg:hidden"
           >
             <ul className="mx-auto max-w-6xl px-5 py-2 sm:px-8">
-              {[...NAV, { href: "/profile", label: copy.nav.profile }, { href: "/settings", label: copy.nav.settings }].map(
-                (item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="block border-b border-rule py-3 text-sm last:border-0"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ),
-              )}
+              {[
+                ...NAV,
+                { href: "/profile", label: copy.nav.profile },
+                { href: "/settings", label: copy.nav.settings },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="block border-b border-rule py-3 text-sm last:border-0"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
         ) : null}
@@ -148,8 +157,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <details>
               <summary className="cursor-pointer font-medium">
                 {capabilities.degradations.length} feature
-                {capabilities.degradations.length === 1 ? " is" : "s are"} running in a reduced
-                mode
+                {capabilities.degradations.length === 1 ? " is" : "s are"}{" "}
+                running in a reduced mode
               </summary>
               <ul className="mt-2 space-y-1.5 pl-4">
                 {capabilities.degradations.map((line) => (
@@ -170,8 +179,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-rule">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-6 text-xs text-ink-faint sm:px-8">
           <p>
-            Not tax, legal or investment advice. Opportunity data carries the source it came
-            from.
+            Not tax, legal or investment advice. Opportunity data carries the
+            source it came from.
           </p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-ink">

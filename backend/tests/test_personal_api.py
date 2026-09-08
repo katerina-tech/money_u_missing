@@ -1,0 +1,315 @@
+"""The personal page over the wire.
+
+The interesting assertions are the ones about what the API refuses to return:
+no combined income total, no tax effect, no inferred household. Those are the
+promises that would be cheapest to break by accident.
+"""
+
+from __future__ import annotations
+
+from fastapi.testclient import TestClient
+
+
+def auth_headers(client: TestClient) -> dict[str, str]:
+    response = client.post("/api/demo/session")
+    assert response.status_code == 200
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+
+# --------------------------------------------------------------- access
+
+
+def test_the_personal_page_needs_an_account(client: TestClient) -> None:
+    for path in ("/api/personal/overview", "/api/personal/income", "/api/personal/expenses"):
+        assert client.get(path).status_code == 401
+
+
+def test_one_account_cannot_delete_another_accounts_record(client: TestClient) -> None:
+    mine = auth_headers(client)
+    created = client.post(
+        "/api/personal/income",
+        headers=mine,
+        json={"label": "Salary", "amount_minor": 300_000, "basis": "NET"},
+    )
+    assert created.status_code == 201
+
+    theirs = auth_headers(client)
+    response = client.delete(f"/api/personal/income/{created.json()['id']}", headers=theirs)
+    # 404 rather than 403: whether an id exists is not something to leak.
+    assert response.status_code == 404
+
+
+# ------------------------------------------------------ baseline income
+
+
+def test_a_recorded_income_keeps_the_basis_it_was_given(client: TestClient) -> None:
+    headers = auth_headers(client)
+    response = client.post(
+        "/api/personal/income",
+        headers=headers,
+        json={"label": "Main job", "amount_minor": 285_000, "basis": "NET"},
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["basis"] == "NET"
+    assert body["amount_minor"] == 285_000
+    assert body["monthly_minor"] == 285_000
+
+
+def test_gross_and_net_are_reported_separately_and_never_summed(client: TestClient) -> None:
+    headers = auth_headers(client)
+    client.post(
+        "/api/personal/income",
+        headers=headers,
+        json={"label": "Salary", "amount_minor": 300_000, "basis": "NET"},
+    )
+    client.post(
+        "/api/personal/income",
+        headers=headers,
+        json={"label": "Retainer", "amount_minor": 100_000, "basis": "GROSS"},
+    )
+
+    baseline = client.get("/api/personal/overview", headers=headers).json()["baseline"]
+    assert baseline["net_monthly_minor"] == 300_000
+    assert baseline["gross_monthly_minor"] == 100_000
+    # No combined figure exists on the wire, because no honest one exists.
+    assert "total_monthly_minor" not in baseline
+    assert any("not added together" in note for note in baseline["notes"])
+
+
+def test_a_one_off_payment_stays_out_of_the_monthly_totals(client: TestClient) -> None:
+    headers = auth_headers(client)
+    client.post(
+        "/api/personal/income",
+        headers=headers,
+        json={
+            "label": "Bonus",
+            "amount_minor": 200_000,
+            "basis": "NET",
+            "period": "ONE_TIME",
+        },
+    )
+    baseline = client.get("/api/personal/overview", headers=headers).json()["baseline"]
+    assert baseline["net_monthly_minor"] == 0
+    assert baseline["one_off_minor"] == 200_000
+    assert baseline["entries"][0]["monthly_minor"] is None
+
+
+def test_only_one_income_can_be_primary(client: TestClient) -> None:
+    headers = auth_headers(client)
+    client.post(
+        "/api/personal/income",
+        headers=headers,
+        json={"label": "First", "amount_minor": 100_000, "is_primary": True},
+    )
+    client.post(
+        "/api/personal/income",
+        headers=headers,
+        json={"label": "Second", "amount_minor": 200_000, "is_primary": True},
+    )
+    entries = client.get("/api/personal/income", headers=headers).json()
+    assert sum(1 for entry in entries if entry["is_primary"]) == 1
+
+
+# ------------------------------------------------------------- expenses
+
+
+def test_expenses_are_totalled_without_any_tax_effect(client: TestClient) -> None:
+    headers = auth_headers(client)
+    for amount, category in ((12_000, "EQUIPMENT"), (3_500, "TRAVEL")):
+        response = client.post(
+            "/api/personal/expenses",
+            headers=headers,
+            json={
+                "label": "A cost",
+                "amount_minor": amount,
+                "category": category,
+                "incurred_on": "2026-02-10",
+            },
+        )
+        assert response.status_code == 201
+
+    summary = client.get("/api/personal/overview", headers=headers).json()["expenses"]
+    assert summary["total_minor"] == 15_500
+    assert summary["count"] == 2
+    # The boundary, checked on the wire rather than only in the type.
+    for forbidden in ("tax_saved_minor", "tax_rate", "deductible_minor", "refund_minor"):
+        assert forbidden not in summary
+    assert "not Steuerberatung" in summary["disclaimer"]
+
+
+def test_recorded_costs_produce_questions_not_verdicts(client: TestClient) -> None:
+    headers = auth_headers(client)
+    client.post(
+        "/api/personal/expenses",
+        headers=headers,
+        json={
+            "label": "Laptop",
+            "amount_minor": 150_000,
+            "category": "EQUIPMENT",
+            "incurred_on": "2026-02-10",
+            "partly_private": "YES",
+        },
+    )
+    summary = client.get("/api/personal/overview", headers=headers).json()["expenses"]
+    asked = " ".join(summary["questions_to_check"])
+    assert "private share" in asked
+    # A percentage would be the product deciding the split, which it does not.
+    assert "%" not in asked
+    assert "deductible" not in asked.lower()
+
+
+def test_an_expense_cannot_belong_to_two_parents(client: TestClient) -> None:
+    headers = auth_headers(client)
+    response = client.post(
+        "/api/personal/expenses",
+        headers=headers,
+        json={
+            "label": "Ambiguous",
+            "amount_minor": 1_000,
+            "incurred_on": "2026-02-10",
+            "income_stream_id": "a",
+            "application_id": "b",
+        },
+    )
+    assert response.status_code == 422
+
+
+# ------------------------------------------------------------ household
+
+
+def test_the_household_is_unknown_until_the_user_says_otherwise(client: TestClient) -> None:
+    headers = auth_headers(client)
+    household = client.get("/api/personal/overview", headers=headers).json()["household"]
+    assert household["has_children"] == "UNKNOWN"
+    assert household["disclosed"] is False
+    assert household["children"] == []
+
+
+def test_disclosing_children_adds_the_questions_it_raises(seeded_client: TestClient) -> None:
+    client = seeded_client
+    headers = auth_headers(client)
+    response = client.put(
+        "/api/personal/household",
+        headers=headers,
+        json={
+            "has_children": "YES",
+            "children": [{"label": "Eldest", "age_years": 9}],
+        },
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["disclosed"] is True
+
+    overview = client.get("/api/personal/overview", headers=headers).json()
+    asked = " ".join(overview["questions_to_check"]).lower()
+    assert "child" in asked
+    # § 32 EStG is quoted, and no entitlement is computed from it.
+    assert any(fact["id"] == "de_kinderfreibetrag" for fact in overview["facts"])
+    for forbidden in ("you will receive", "you are entitled", "your allowance is"):
+        assert forbidden not in asked
+
+
+def test_a_child_cannot_be_recorded_alongside_no_children(client: TestClient) -> None:
+    headers = auth_headers(client)
+    response = client.put(
+        "/api/personal/household",
+        headers=headers,
+        json={"has_children": "NO", "children": [{"label": "Eldest", "age_years": 9}]},
+    )
+    assert response.status_code == 422
+
+
+def test_every_cited_fact_carries_a_source_and_a_status(seeded_client: TestClient) -> None:
+    client = seeded_client
+    headers = auth_headers(client)
+    client.put("/api/personal/household", headers=headers, json={"has_children": "YES"})
+    for fact in client.get("/api/personal/overview", headers=headers).json()["facts"]:
+        assert fact["source_url"]
+        assert fact["status"]
+        assert fact["last_verified_at"]
+
+
+# ------------------------------------------------------------- overview
+
+
+def test_the_uplift_is_none_without_a_baseline(client: TestClient) -> None:
+    headers = auth_headers(client)
+    assert client.get("/api/personal/overview", headers=headers).json()["uplift_ratio"] is None
+
+
+def test_the_overview_never_states_a_tax_position(client: TestClient) -> None:
+    headers = auth_headers(client)
+    body = client.get("/api/personal/overview", headers=headers).json()
+    for forbidden in ("tax_owed_minor", "tax_saved_minor", "net_after_tax_minor", "refund_minor"):
+        assert forbidden not in body
+    assert "does not calculate tax" in body["disclaimer"]
+
+
+def test_with_no_corpus_nothing_is_cited_and_nothing_is_invented(client: TestClient) -> None:
+    """The designed degradation: an empty corpus removes claims, not the page."""
+    headers = auth_headers(client)
+    client.put("/api/personal/household", headers=headers, json={"has_children": "YES"})
+    overview = client.get("/api/personal/overview", headers=headers).json()
+
+    assert overview["facts"] == []
+    # The question survives without the citation, because asking it costs
+    # nothing and answering it from memory would cost everything.
+    assert any("children" in question.lower() for question in overview["questions_to_check"])
+
+
+# ------------------------------------------- money you may be losing
+
+
+def test_the_leaks_endpoint_needs_an_account(client: TestClient) -> None:
+    assert client.get("/api/personal/leaks").status_code == 401
+
+
+def test_a_fresh_account_is_told_only_what_it_can_act_on(
+    seeded_client: TestClient,
+) -> None:
+    """No filler. A demo profile has a benefit status of unknown, so the one
+    finding it gets is the prompt to say - not a list of generic tax tips."""
+    client = seeded_client
+    headers = auth_headers(client)
+    body = client.get("/api/personal/leaks", headers=headers).json()
+
+    assert body["total"] == len(body["leaks"])
+    for leak in body["leaks"]:
+        # Every finding says what in the user's data triggered it.
+        assert leak["why_this_applies"]
+        assert leak["what_to_check"]
+    # No euro total, ever.
+    assert "total_minor" not in body
+    assert "saving_minor" not in body
+    assert "Steuerberatung" in body["disclaimer"]
+    assert "money is owed to you" in body["disclaimer"]
+
+
+def test_recording_income_raises_the_missing_costs_finding(
+    seeded_client: TestClient,
+) -> None:
+    client = seeded_client
+    headers = auth_headers(client)
+    client.post(
+        "/api/personal/income",
+        headers=headers,
+        json={"label": "Main job", "amount_minor": 285_000, "basis": "NET"},
+    )
+    ids = {leak["id"] for leak in client.get("/api/personal/leaks", headers=headers).json()["leaks"]}
+    assert "no_costs_recorded" in ids
+
+
+def test_a_quoted_ceiling_is_labelled_as_the_statutes_figure(
+    seeded_client: TestClient,
+) -> None:
+    client = seeded_client
+    headers = auth_headers(client)
+    client.put("/api/personal/household", headers=headers, json={"has_children": "YES"})
+    body = client.get("/api/personal/leaks", headers=headers).json()
+
+    for leak in body["leaks"]:
+        if leak["stated_amount_minor"] is not None:
+            # A figure may only appear alongside a note saying whose figure it
+            # is, and a source backing it.
+            assert leak["amount_note"]
+            assert leak["fact_ids"]

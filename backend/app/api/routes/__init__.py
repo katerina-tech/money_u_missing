@@ -10,7 +10,16 @@ mounted.
 
 from fastapi import APIRouter
 
-from app.api.routes import actions, auth, grow, keep, meta, opportunities, profile
+from app.api.routes import (
+    actions,
+    auth,
+    grow,
+    keep,
+    meta,
+    opportunities,
+    personal,
+    profile,
+)
 
 ROUTERS: tuple[APIRouter, ...] = (
     meta.router,
@@ -20,6 +29,7 @@ ROUTERS: tuple[APIRouter, ...] = (
     actions.router,
     keep.router,
     grow.router,
+    personal.router,
 )
 
 __all__ = ["ROUTERS"]

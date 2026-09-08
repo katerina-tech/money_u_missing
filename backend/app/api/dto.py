@@ -19,9 +19,12 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.domain.enums import (
     ActionabilityBand,
+    AmountBasis,
     ApplicationStatus,
     BenefitDisclosure,
+    CompensationPeriod,
     DismissReason,
+    ExpenseCategory,
     FinancialGoalType,
     IncomePreference,
     IncomeStreamCategory,
@@ -508,6 +511,156 @@ class ChildGoalDto(ChildGoalRequest):
     id: str
     currency: str = "EUR"
     years_remaining: int
+
+
+# =========================================================== personal money
+
+
+class BaselineIncomeRequest(ApiModel):
+    """An income the user already has.
+
+    ``basis`` is separate from the amount and never derived from it. The API
+    will not accept "net" and return a gross figure, or the other way round,
+    because nothing behind it performs that conversion - see
+    ``app.domain.finances``.
+    """
+
+    label: str = Field(min_length=1, max_length=160)
+    amount_minor: int = Field(ge=0)
+    basis: AmountBasis = AmountBasis.UNKNOWN
+    period: CompensationPeriod = CompensationPeriod.RECURRING
+    is_primary: bool = False
+    started_on: date | None = None
+
+
+class BaselineIncomeDto(BaselineIncomeRequest):
+    id: str
+    currency: str = "EUR"
+    #: ``None`` when the period implies no monthly figure. Never zero, which
+    #: would read as "earns nothing monthly" rather than "not applicable".
+    monthly_minor: int | None = None
+
+
+class BaselinePictureDto(ApiModel):
+    entries: list[BaselineIncomeDto] = Field(default_factory=list)
+    currency: str = "EUR"
+    #: Three separate totals. They are not summed anywhere, including here.
+    net_monthly_minor: int = 0
+    gross_monthly_minor: int = 0
+    unlabelled_monthly_minor: int = 0
+    one_off_minor: int = 0
+    #: What a reader must know before comparing the figures above.
+    notes: list[str] = Field(default_factory=list)
+
+
+class ExpenseRequest(ApiModel):
+    label: str = Field(min_length=1, max_length=200)
+    amount_minor: int = Field(ge=0)
+    category: ExpenseCategory = ExpenseCategory.OTHER
+    incurred_on: date
+    has_receipt: Tristate = Tristate.UNKNOWN
+    partly_private: Tristate = Tristate.UNKNOWN
+    income_stream_id: str | None = None
+    application_id: str | None = None
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class ExpenseDto(ExpenseRequest):
+    id: str
+    currency: str = "EUR"
+
+
+class CategoryTotalDto(ApiModel):
+    category: ExpenseCategory
+    total_minor: int
+    count: int
+    without_receipt: int
+    partly_private: int
+
+
+class ExpenseSummaryDto(ApiModel):
+    """Totals of the user's own figures. There is no tax effect on this type."""
+
+    currency: str = "EUR"
+    total_minor: int = 0
+    count: int = 0
+    by_category: list[CategoryTotalDto] = Field(default_factory=list)
+    without_receipt_count: int = 0
+    questions_to_check: list[str] = Field(default_factory=list)
+    disclaimer: str
+
+
+class ChildDto(ApiModel):
+    label: str = Field(min_length=1, max_length=80)
+    age_years: int = Field(ge=0, le=30)
+    in_education_or_training: Tristate = Tristate.UNKNOWN
+
+
+class HouseholdRequest(ApiModel):
+    """Explicit disclosure only. Nothing here is inferred from the profile."""
+
+    has_children: Tristate = Tristate.UNKNOWN
+    jointly_assessed: Tristate = Tristate.UNKNOWN
+    children: list[ChildDto] = Field(default_factory=list, max_length=12)
+
+
+class HouseholdDto(HouseholdRequest):
+    disclosed: bool = False
+
+
+class PersonalOverviewDto(ApiModel):
+    """Everything the personal page shows, assembled once.
+
+    Note what is absent: no combined income figure, no tax owed, no tax saved,
+    no entitlement. Each of those would be this product answering a question it
+    has said it does not answer.
+    """
+
+    baseline: BaselinePictureDto
+    expenses: ExpenseSummaryDto
+    household: HouseholdDto
+    #: Additional monthly income the user is aiming for, from the profile.
+    goal_monthly_minor: int | None = None
+    #: The goal as a fraction of the recurring baseline, or ``None`` when there
+    #: is no baseline to compare against.
+    uplift_ratio: float | None = None
+    #: Source-backed German context, and the questions it raises.
+    facts: list[LegalFactDto] = Field(default_factory=list)
+    questions_to_check: list[str] = Field(default_factory=list)
+    disclaimer: str = (
+        "This page adds up figures you entered. It does not calculate tax, does not "
+        "convert between gross and net, and is not Steuerberatung."
+    )
+
+
+class LeakDto(ApiModel):
+    """One thing worth checking, with the reason it was raised for this user.
+
+    There is no field for money saved, and there will not be one:
+    ``stated_amount_minor`` is the figure the statute prints, not a figure
+    anyone is promised.
+    """
+
+    id: str
+    title: str
+    why_this_applies: str
+    what_to_check: str
+    fact_ids: list[str] = Field(default_factory=list)
+    stated_amount_minor: int | None = None
+    amount_note: str | None = None
+
+
+class LeaksResponse(ApiModel):
+    leaks: list[LeakDto] = Field(default_factory=list)
+    #: Counts, never a euro total. Summing statutory ceilings a person may not
+    #: qualify for is exactly the confident wrong number this product avoids.
+    total: int = 0
+    with_sources: int = 0
+    disclaimer: str = (
+        "These are things worth checking, raised from what you told us and backed by "
+        "the sources cited. None of them is a statement that money is owed to you, and "
+        "none of it is Steuerberatung."
+    )
 
 
 # ============================================================= validation

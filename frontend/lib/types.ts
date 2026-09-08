@@ -20,10 +20,7 @@ export type TrustLabel =
   | "UNKNOWN";
 
 export type ActionabilityBand =
-  | "HIGHLY_ACTIONABLE"
-  | "ACTIONABLE"
-  | "REVIEW_FIRST"
-  | "LOW_PRIORITY";
+  "HIGHLY_ACTIONABLE" | "ACTIONABLE" | "REVIEW_FIRST" | "LOW_PRIORITY";
 
 export type ApplicationStatus =
   | "DISCOVERED"
@@ -50,9 +47,11 @@ export type DismissReason =
 export type Tristate = "YES" | "NO" | "UNKNOWN";
 export type BenefitDisclosure = "YES" | "NO" | "PREFER_NOT_TO_SAY" | "UNKNOWN";
 export type RemoteType = "REMOTE" | "HYBRID" | "ONSITE" | "UNKNOWN";
-export type SkillLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT" | "UNKNOWN";
+export type SkillLevel =
+  "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT" | "UNKNOWN";
 export type SkillEvidence = "CV" | "USER_STATED" | "INFERRED";
-export type LanguageLevel = "A1" | "A2" | "B1" | "B2" | "C1" | "C2" | "NATIVE" | "UNKNOWN";
+export type LanguageLevel =
+  "A1" | "A2" | "B1" | "B2" | "C1" | "C2" | "NATIVE" | "UNKNOWN";
 
 export interface Tokens {
   access_token: string;
@@ -104,7 +103,8 @@ export interface Profile {
   minimum_worthwhile_minor: number | null;
   income_preference: "RECURRING" | "ONE_TIME" | "NO_PREFERENCE";
   hours_per_week: number | null;
-  schedule_preference: "EVENINGS" | "WEEKENDS" | "WEEKDAY_HOURS" | "FLEXIBLE" | "UNKNOWN";
+  schedule_preference:
+    "EVENINGS" | "WEEKENDS" | "WEEKDAY_HOURS" | "FLEXIBLE" | "UNKNOWN";
   remote_preference: RemoteType;
   willing_to_travel: Tristate;
   work_status:
@@ -159,7 +159,11 @@ export interface Match {
   eligible: boolean;
   components: ScoreComponent[];
   hard_failures: { requirement: string; explanation: string }[];
-  uncertainties: { topic: string; explanation: string; how_to_resolve: string | null }[];
+  uncertainties: {
+    topic: string;
+    explanation: string;
+    how_to_resolve: string | null;
+  }[];
   explanation_inputs: string[];
   /** Model-written. Always labelled as such; the bullets are the source of truth. */
   explanation: string | null;
@@ -221,7 +225,11 @@ export interface OpportunityDetail extends OpportunitySummary {
   required_skills: string[];
   preferred_skills: string[];
   eligibility_text: string | null;
-  eligibility_structured: { label: string; strength: string; source_text: string | null }[];
+  eligibility_structured: {
+    label: string;
+    strength: string;
+    source_text: string | null;
+  }[];
   experience_min_years: number | null;
   experience_max_years: number | null;
   employment_type: string;
@@ -349,7 +357,8 @@ export interface LegalFact {
 
 export interface Goal {
   id: string;
-  goal_type: "EMERGENCY_FUND" | "HOME" | "EDUCATION" | "RETIREMENT" | "CHILD" | "OTHER";
+  goal_type:
+    "EMERGENCY_FUND" | "HOME" | "EDUCATION" | "RETIREMENT" | "CHILD" | "OTHER";
   name: string;
   target_minor: number;
   target_date: string | null;
@@ -432,4 +441,121 @@ export interface SourceProvenance {
   access_basis: string;
   enabled: boolean;
   note: string | null;
+}
+
+// ------------------------------------------------------- personal money
+
+export type AmountBasis = "GROSS" | "NET" | "UNKNOWN";
+
+export type ExpenseCategory =
+  | "EQUIPMENT"
+  | "SOFTWARE_AND_SUBSCRIPTIONS"
+  | "TRAVEL"
+  | "WORKSPACE"
+  | "PROFESSIONAL_DEVELOPMENT"
+  | "PROFESSIONAL_SERVICES"
+  | "INSURANCE_AND_CONTRIBUTIONS"
+  | "MATERIALS"
+  | "COMMUNICATION"
+  | "MARKETING"
+  | "FEES_AND_CHARGES"
+  | "OTHER";
+
+export interface BaselineIncome {
+  id: string;
+  label: string;
+  amount_minor: number;
+  currency: string;
+  basis: AmountBasis;
+  period: "ONE_TIME" | "RECURRING" | "IRREGULAR" | "UNKNOWN";
+  is_primary: boolean;
+  started_on: string | null;
+  /** null when the period implies no monthly figure. Never 0 for "unknown". */
+  monthly_minor: number | null;
+}
+
+export interface BaselinePicture {
+  entries: BaselineIncome[];
+  currency: string;
+  /** Three separate totals. Deliberately no combined figure. */
+  net_monthly_minor: number;
+  gross_monthly_minor: number;
+  unlabelled_monthly_minor: number;
+  one_off_minor: number;
+  notes: string[];
+}
+
+export interface Expense {
+  id: string;
+  label: string;
+  amount_minor: number;
+  currency: string;
+  category: ExpenseCategory;
+  incurred_on: string;
+  has_receipt: Tristate;
+  partly_private: Tristate;
+  income_stream_id: string | null;
+  application_id: string | null;
+  notes: string | null;
+}
+
+export interface CategoryTotal {
+  category: ExpenseCategory;
+  total_minor: number;
+  count: number;
+  without_receipt: number;
+  partly_private: number;
+}
+
+export interface ExpenseSummary {
+  currency: string;
+  total_minor: number;
+  count: number;
+  by_category: CategoryTotal[];
+  without_receipt_count: number;
+  questions_to_check: string[];
+  disclaimer: string;
+}
+
+export interface HouseholdChild {
+  label: string;
+  age_years: number;
+  in_education_or_training: Tristate;
+}
+
+export interface Household {
+  has_children: Tristate;
+  jointly_assessed: Tristate;
+  children: HouseholdChild[];
+  disclosed: boolean;
+}
+
+export interface PersonalOverview {
+  baseline: BaselinePicture;
+  expenses: ExpenseSummary;
+  household: Household;
+  goal_monthly_minor: number | null;
+  uplift_ratio: number | null;
+  facts: LegalFact[];
+  questions_to_check: string[];
+  disclaimer: string;
+}
+
+export interface Leak {
+  id: string;
+  title: string;
+  why_this_applies: string;
+  what_to_check: string;
+  fact_ids: string[];
+  /** The figure the statute prints. Never what this user would receive. */
+  stated_amount_minor: number | null;
+  amount_note: string | null;
+}
+
+export interface LeaksResponse {
+  leaks: Leak[];
+  /** Counts only. There is deliberately no euro total on this type. */
+  total: number;
+  with_sources: number;
+  disclaimer: string;
 }

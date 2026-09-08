@@ -415,6 +415,61 @@ class LegalVerificationStatus(StrEnum):
     UNKNOWN = "UNKNOWN"
 
 
+class AmountBasis(StrEnum):
+    """Whether a figure the user gave us is before or after deductions.
+
+    There is deliberately no conversion between GROSS and NET anywhere in this
+    product. Going from one to the other in Germany needs the Steuerklasse,
+    church tax status, the federal state, the health and care insurance rates
+    and any Freibetraege - and performing that calculation for an individual is
+    the regulated act this product does not do. Whichever figure the user gives
+    us is the one we store, labelled, and the one we show back.
+    """
+
+    GROSS = "GROSS"
+    NET = "NET"
+    UNKNOWN = "UNKNOWN"
+
+
+class ExpenseCategory(StrEnum):
+    """Categories of cost a self-employed person commonly records.
+
+    Naming a category is *not* a statement that the expense is deductible.
+    Whether a particular cost was "durch den Betrieb veranlasst" within the
+    meaning of Section 4 Abs. 4 EStG turns on facts this product cannot see:
+    private use, proportion, documentation, the nature of the activity. The
+    categories exist so a person can organise their own records and take a
+    specific question to a Steuerberater. They carry no verdict.
+    """
+
+    EQUIPMENT = "EQUIPMENT"
+    SOFTWARE_AND_SUBSCRIPTIONS = "SOFTWARE_AND_SUBSCRIPTIONS"
+    TRAVEL = "TRAVEL"
+    WORKSPACE = "WORKSPACE"
+    PROFESSIONAL_DEVELOPMENT = "PROFESSIONAL_DEVELOPMENT"
+    PROFESSIONAL_SERVICES = "PROFESSIONAL_SERVICES"
+    INSURANCE_AND_CONTRIBUTIONS = "INSURANCE_AND_CONTRIBUTIONS"
+    MATERIALS = "MATERIALS"
+    COMMUNICATION = "COMMUNICATION"
+    MARKETING = "MARKETING"
+    FEES_AND_CHARGES = "FEES_AND_CHARGES"
+    OTHER = "OTHER"
+
+
+#: Categories where private use is the usual reason a cost is only partly
+#: claimable, and so the ones most worth raising a question about. A prompt to
+#: ask - never a deduction rule, and never a percentage.
+MIXED_USE_PRONE_CATEGORIES: frozenset[ExpenseCategory] = frozenset(
+    {
+        ExpenseCategory.EQUIPMENT,
+        ExpenseCategory.WORKSPACE,
+        ExpenseCategory.COMMUNICATION,
+        ExpenseCategory.TRAVEL,
+        ExpenseCategory.SOFTWARE_AND_SUBSCRIPTIONS,
+    }
+)
+
+
 class LegalCategory(StrEnum):
     SELF_EMPLOYMENT = "SELF_EMPLOYMENT"
     TRADE_REGISTRATION = "TRADE_REGISTRATION"
