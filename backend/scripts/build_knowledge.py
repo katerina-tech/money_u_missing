@@ -535,6 +535,40 @@ FACTS: list[dict] = [
         "verification_status": "VERIFIED",
     },
     {
+        # Read from the § 32 EStG page. The two Freibetraege are quoted as the
+        # statute states them, per child. What this fact deliberately does NOT
+        # record is what any individual gets: § 31 EStG makes the allowance and
+        # Kindergeld alternatives resolved by a comparison at assessment, and
+        # halving or transfer between parents turns on the family's
+        # circumstances. Those are questions for a Finanzamt, and the product
+        # asks them rather than answering them.
+        "id": "de_kinderfreibetrag",
+        "category": "FAMILY",
+        "title": "Freibetraege fuer Kinder",
+        "summary": (
+            "For each child taken into account, § 32 Abs. 6 EStG deducts a Freibetrag "
+            "of 3,414 EUR for the child's saechliches Existenzminimum (Kinderfreibetrag) "
+            "plus 1,464 EUR for care, upbringing or education needs. A child is taken "
+            "into account from the month of birth while under 18 (§ 32 Abs. 3 EStG); "
+            "after 18 further conditions apply (§ 32 Abs. 4 EStG). Whether the "
+            "allowance or Kindergeld is more favourable, and how the amounts are split "
+            "between parents, is decided at assessment and is not computed here."
+        ),
+        "structured_value": {
+            "kinderfreibetrag_eur": 3414,
+            "betreuungsfreibetrag_eur": 1464,
+            "per": "child",
+            "statute": "§ 32 Abs. 3, 4 und 6 EStG",
+        },
+        # The statute page does not print a Veranlagungszeitraum beside the
+        # figures, so none is asserted. The retrieval date carries the currency
+        # of the claim, and the freshness horizon does the rest.
+        "effective_from": None,
+        "source_name": GESETZE,
+        "source_url": "https://www.gesetze-im-internet.de/estg/__32.html",
+        "verification_status": "VERIFIED",
+    },
+    {
         "id": "de_sparer_pauschbetrag",
         "category": "CAPITAL_INCOME",
         "title": "Sparer-Pauschbetrag",
@@ -719,20 +753,59 @@ FACTS: list[dict] = [
         "content_available": False,
     },
     {
+        # Was NOT YET VERIFIED until the § 3 EStG page was read on 2026-09-07.
+        # Both figures below are printed in the statute, so they are quoted; the
+        # eligibility condition is quoted with them, because the allowance turns
+        # entirely on *who* the work is for and that is the part people get
+        # wrong.
         "id": "de_uebungsleiterfreibetrag",
         "category": "INCOME_TAX",
         "title": "Übungsleiterfreibetrag and Ehrenamtspauschale",
         "summary": (
-            "NOT YET VERIFIED. Tax allowances exist for certain teaching, training and "
-            "voluntary activity carried out for non-profit or public bodies (§ 3 Nr. 26 "
-            "and Nr. 26a EStG). We have not recorded the current amounts, so this product "
-            "does not state them."
+            "Income from secondary activity as an Übungsleiter, Ausbilder, Erzieher or "
+            "Betreuer, from secondary artistic activity, or from the secondary care of "
+            "elderly, sick or disabled people is tax-free up to 3,300 EUR a year - but "
+            "only where the activity serves charitable, benevolent or church purposes "
+            "(§§ 52-54 AO) and is carried out in the service or on behalf of a public-law "
+            "body or a body falling under § 5 Abs. 1 Nr. 9 KStG (§ 3 Nr. 26 EStG). A "
+            "separate allowance of 960 EUR a year applies to other secondary activity "
+            "for such bodies (§ 3 Nr. 26a EStG). Whether a particular engagement meets "
+            "those conditions is not something this product can determine."
         ),
-        "structured_value": {"statute": "§ 3 Nr. 26, Nr. 26a EStG"},
+        "structured_value": {
+            "uebungsleiter_eur_per_year": 3300,
+            "ehrenamt_eur_per_year": 960,
+            "statute": "§ 3 Nr. 26, Nr. 26a EStG",
+        },
         "source_name": GESETZE,
         "source_url": "https://www.gesetze-im-internet.de/estg/__3.html",
-        "verification_status": "UNKNOWN",
-        "content_available": False,
+        "verification_status": "VERIFIED",
+    },
+    {
+        # Read from the § 4 EStG page on 2026-09-07. Two alternatives with the
+        # same ceiling, which is exactly the sort of thing people miss.
+        "id": "de_homeoffice_pauschale",
+        "category": "INCOME_TAX",
+        "title": "Häusliches Arbeitszimmer and Tagespauschale",
+        "summary": (
+            "Where a home study is the centre of the entire business and professional "
+            "activity, a Jahrespauschale of 1,260 EUR may be deducted for the year "
+            "instead of the actual costs (§ 4 Abs. 5 Satz 1 Nr. 6b EStG). Otherwise, for "
+            "each calendar day on which the activity is carried out mainly at home and no "
+            "first place of work outside the home is visited, a Tagespauschale of 6 EUR "
+            "may be deducted, up to a maximum of 1,260 EUR in the year (§ 4 Abs. 5 Satz 1 "
+            "Nr. 6c EStG). Which of the two applies depends on the facts of the "
+            "individual case."
+        ),
+        "structured_value": {
+            "jahrespauschale_eur": 1260,
+            "tagespauschale_eur_per_day": 6,
+            "tagespauschale_annual_cap_eur": 1260,
+            "statute": "§ 4 Abs. 5 Satz 1 Nr. 6b und 6c EStG",
+        },
+        "source_name": GESETZE,
+        "source_url": "https://www.gesetze-im-internet.de/estg/__4.html",
+        "verification_status": "VERIFIED",
     },
 ]
 
