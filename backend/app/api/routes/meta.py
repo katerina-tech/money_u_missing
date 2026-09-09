@@ -278,6 +278,41 @@ def start_demo(
             )
         )
 
+    # The demo profile needs a money picture, not just skills: an empty personal
+    # page demonstrates nothing, and "where you are" with no A is a band with one
+    # pole. These are the fictional professional's own figures, in the same shape
+    # a real user would type them.
+    from datetime import date, timedelta
+
+    from app.db.models import BaselineIncomeRow, ExpenseRow
+
+    session.add(
+        BaselineIncomeRow(
+            user_id=user.id,
+            label="Data engineer, full time",
+            amount_minor=285_000,
+            basis="NET",
+            period="RECURRING",
+            is_primary=True,
+        )
+    )
+    today = date.today()
+    for label, amount, category, days_ago, receipt in (
+        ("Laptop", 149_900, "EQUIPMENT", 40, "YES"),
+        ("Conference ticket", 39_000, "PROFESSIONAL_DEVELOPMENT", 25, "YES"),
+        ("Coworking day passes", 9_000, "WORKSPACE", 12, "NO"),
+    ):
+        session.add(
+            ExpenseRow(
+                user_id=user.id,
+                label=label,
+                amount_minor=amount,
+                category=category,
+                incurred_on=today - timedelta(days=days_ago),
+                has_receipt=receipt,
+            )
+        )
+
     analytics.record(session, "signup_completed", user_id=user.id, is_demo=True)
     log_event(logger, Event.SIGNUP_COMPLETED, "demo session started")
 

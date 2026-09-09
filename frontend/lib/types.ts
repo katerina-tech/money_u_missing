@@ -559,3 +559,14 @@ export interface LeaksResponse {
   with_sources: number;
   disclaimer: string;
 }
+
+export interface Targets {
+  current_monthly_minor: number;
+  /** Returned exactly as the user set it, including below the current income. */
+  target_monthly_minor: number;
+  /** The gap the product exists to close. Never negative. */
+  additional_needed_minor: number;
+  /** True when B sits at or below A. The band says so; it does not move B. */
+  target_reached: boolean;
+  currency: string;
+}

@@ -33,7 +33,7 @@ from app.db.models import (
     SavedOpportunity,
     User,
 )
-from app.domain.enums import IncomeStreamCategory
+from app.domain.enums import AmountBasis, CompensationPeriod, IncomeStreamCategory
 from app.domain.finances import (
     BaselineIncome,
     Child,
@@ -424,3 +424,95 @@ def money_you_may_be_losing(
         total=counts["total"],
         with_sources=counts["with_sources"],
     )
+
+
+# ------------------------------------------------------- the two numbers
+
+#: The label given to the baseline entry the A-to-B band creates. Recognisable
+#: on the personal page, so a figure typed on the dashboard does not appear
+#: there as a mystery row.
+BAND_INCOME_LABEL = "Current income"
+
+
+def _targets(session: Session, user_id: str, profile: Profile | None) -> dto.TargetsDto:
+    picture = finances.load_baseline(session, user_id)
+    current = picture.net_monthly_minor or picture.gross_monthly_minor
+    additional = (profile.desired_additional_monthly_minor if profile else None) or 0
+
+    # The stored target is the user's own figure and is returned unchanged.
+    # Falling back to current + additional covers everyone who set a goal
+    # before this column existed, and matches what the band used to show.
+    stored = profile.target_monthly_minor if profile else None
+    target = stored if stored is not None else current + additional
+
+    return dto.TargetsDto(
+        current_monthly_minor=current,
+        target_monthly_minor=target,
+        additional_needed_minor=max(0, target - current),
+        target_reached=target <= current,
+        currency=picture.currency,
+    )
+
+
+@router.get("/targets", response_model=dto.TargetsDto)
+def read_targets(
+    user: User = Depends(current_user), session: Session = Depends(get_db)
+) -> dto.TargetsDto:
+    return _targets(session, user.id, _profile(session, user.id))
+
+
+@router.put("/targets", response_model=dto.TargetsDto)
+def set_targets(
+    payload: dto.TargetsRequest,
+    user: User = Depends(current_user),
+    session: Session = Depends(get_db),
+) -> dto.TargetsDto:
+    """Set where you are and where you want to be, in one call.
+
+    The profile stores the *additional* income being aimed for, so the target
+    is converted here. A target below the current income means the gap is zero
+    rather than negative - the product does not ask anyone to earn less.
+    """
+    profile = _profile(session, user.id)
+    if profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Create your profile before setting these.",
+        )
+
+    # A single recurring entry stands for "what I earn now". If the user has
+    # several, the band edits the primary one and leaves the rest alone -
+    # overwriting a carefully entered list from a one-box edit would be rude.
+    primary = session.scalars(
+        select(BaselineIncomeRow)
+        .where(BaselineIncomeRow.user_id == user.id)
+        .order_by(BaselineIncomeRow.is_primary.desc(), BaselineIncomeRow.label)
+    ).first()
+
+    if primary is None:
+        primary = BaselineIncomeRow(
+            user_id=user.id,
+            label=BAND_INCOME_LABEL,
+            amount_minor=payload.current_monthly_minor,
+            basis=AmountBasis.NET.value,
+            period=CompensationPeriod.RECURRING.value,
+            is_primary=True,
+        )
+        session.add(primary)
+        session.flush()
+        finances.demote_other_primaries(session, user.id, primary.id)
+    else:
+        primary.amount_minor = payload.current_monthly_minor
+        # The basis is left exactly as the user set it. Guessing "net" over an
+        # entry they marked gross would quietly restate their own figure.
+
+    # Both are stored: the target because it is what the user said, and the
+    # additional because that is what the matcher scores against. Deriving the
+    # target back from the additional would lose any target at or below the
+    # current income, which is the case this pair exists to keep honest.
+    profile.target_monthly_minor = payload.target_monthly_minor
+    profile.desired_additional_monthly_minor = max(
+        0, payload.target_monthly_minor - payload.current_monthly_minor
+    )
+    session.commit()
+    return _targets(session, user.id, profile)

@@ -143,6 +143,14 @@ class Profile(Base, TimestampMixin):
     languages: Mapped[dict[str, Any]] = mapped_column(JsonDict, default=dict)
 
     desired_additional_monthly_minor: Mapped[int | None] = mapped_column(Integer, default=None)
+    #: The total monthly income the user says they want - point B on the
+    #: dashboard band. Stored rather than derived from the field above,
+    #: because a target at or below the current income cannot be expressed
+    #: as a non-negative "additional", and rewriting the user's own figure to
+    #: make the arithmetic work is precisely what this product must not do.
+    #: NULL for anyone who has not set one; the band then falls back to
+    #: current + additional, which is what it always showed.
+    target_monthly_minor: Mapped[int | None] = mapped_column(Integer, default=None)
     minimum_worthwhile_minor: Mapped[int | None] = mapped_column(Integer, default=None)
     current_primary_income_type: Mapped[str | None] = mapped_column(String(80), default=None)
     income_preference: Mapped[str] = mapped_column(String(32), default="NO_PREFERENCE")

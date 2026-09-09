@@ -1,40 +1,49 @@
 "use client";
 
 /**
- * A to B: where your money is now, where you want it, and what sits between.
+ * A to B: what you earn now, what you want to earn, and the two ways there.
  *
- * This is the product's central claim rendered as one object, so it has to
- * carry the product's central discipline too. Three rules are structural here,
- * not stylistic:
+ * The product's central claim rendered as one object, so it carries the
+ * product's central discipline too.
  *
- * 1. The goal rail is fed by `goal_progress_ratio`, which the backend computes
- *    from secured and earned money only. This component never derives it, so a
- *    front-end change cannot quietly start counting potential towards a goal.
- * 2. Potential is drawn on its own track, dashed, below the rail, and captioned
- *    as a hypothetical. It is never added to the rail and never shares its
- *    colour. Someone glancing at this for two seconds must not come away
- *    believing they have earned money they have not.
- * 3. A stage with nothing in it is drawn hollow rather than hidden. An empty
- *    pipeline is information; a pipeline that hides its empty stages is a
- *    picture of progress that has not happened.
+ * **A and B are the user's own figures, and both are editable here.** Someone
+ * looking at this should be able to say "I earn 2,000, I want 4,000" without
+ * hunting through a profile form. They are sent as a pair, because the profile
+ * stores the *additional* income being aimed for - raising A with B left alone
+ * would otherwise silently raise the target too.
  *
- * Interactive: selecting a stage lists what is actually in it. The counts are
- * the claim; the list is the evidence for it.
+ * **Two directions, given equal weight as blocks.** Earning more is the
+ * product's main promise; keeping more is what is available in a week when no
+ * new opportunity appears. Neither block shows a euro figure it cannot defend:
+ * the earn side labels its potential as potential, and the keep side shows a
+ * count of things to check, never a sum of statutory ceilings the user may not
+ * qualify for.
+ *
+ * **The rails below are unchanged in their honesty.** The goal rail is fed by
+ * `goal_progress_ratio`, computed by the backend from secured and earned money
+ * only, so no front-end change can start counting potential as progress.
+ * Potential sits on its own dashed track, captioned as a hypothetical. An empty
+ * pipeline stage is drawn hollow rather than hidden.
  */
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { api } from "@/lib/api";
 import { copy } from "@/lib/copy";
-import { formatMinor } from "@/lib/format";
-import type { Application, ApplicationStatus, MoneyMap } from "@/lib/types";
+import { formatMinor, parseMoneyInput } from "@/lib/format";
+import type {
+  Application,
+  ApplicationStatus,
+  MoneyMap,
+  Targets,
+} from "@/lib/types";
 
 type StageId = "found" | "applied" | "offered" | "secured" | "earned";
 
 interface Stage {
   id: StageId;
   label: string;
-  /** What being in this stage actually means. Shown when the stage is open. */
   meaning: string;
   count: number;
   items: {
@@ -43,7 +52,6 @@ interface Stage {
     organization: string | null;
     href: string;
   }[];
-  /** Committed stages are drawn solid; potential ones are drawn muted. */
   committed: boolean;
 }
 
@@ -56,11 +64,18 @@ export function MoneyJourney({
 }: {
   map: MoneyMap;
   applications: Application[] | null;
-  /** How many things are worth checking on the keep side. `null` while it
-   *  loads or if it fails - the band renders either way. */
+  /** How many things are worth checking on the keep side. */
   leakCount?: number | null;
 }) {
   const [open, setOpen] = useState<StageId | null>(null);
+  const [targets, setTargets] = useState<Targets | null>(null);
+
+  useEffect(() => {
+    void api
+      .targets()
+      .then(setTargets)
+      .catch(() => setTargets(null));
+  }, []);
 
   const stages = useMemo<Stage[]>(() => {
     const apps = applications ?? [];
@@ -131,14 +146,12 @@ export function MoneyJourney({
     ];
   }, [map, applications]);
 
-  const goal = map.goal_monthly_minor;
   const ratio = map.goal_progress_ratio;
   const percent =
     ratio === null ? 0 : Math.round(Math.min(1, Math.max(0, ratio)) * 100);
 
-  // The hypothetical track. Deliberately computed separately and never mixed
-  // into `percent` above.
   const potentialMonthly = map.summary.recurring_potential_monthly_minor;
+  const goal = map.goal_monthly_minor;
   const potentialPercent =
     goal && goal > 0 && potentialMonthly > 0
       ? Math.round(Math.min(1, potentialMonthly / goal) * 100)
@@ -150,93 +163,124 @@ export function MoneyJourney({
     -1,
   );
 
+  const currency = targets?.currency ?? map.currency;
+  const opportunityCount = map.opportunities.length;
+
+  async function save(current: number, target: number) {
+    setTargets(await api.setTargets(current, target));
+  }
+
   return (
     <section
       aria-label="From where you are to where you want to be"
       className="mb-8 overflow-hidden rounded-[--radius-card] border border-rule bg-paper-raised"
     >
-      {/* ------------------------------------------------ A and B, the poles */}
-      <div className="grid gap-6 border-b border-rule p-5 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4 sm:p-6">
-        <div>
-          <p className="eyebrow mb-1.5">
-            <span className="mr-1.5 inline-block rounded-[3px] bg-ink px-1.5 py-px font-mono text-[10px] text-paper">
-              A
-            </span>
-            Where you are
-          </p>
-          <p className="tnum text-3xl leading-none sm:text-4xl">
-            {formatMinor(map.summary.earned_total_minor, map.currency)}
-          </p>
-          <p className="mt-1.5 text-xs text-ink-faint">
-            earned so far · {map.summary.earned_count} recorded
-          </p>
-        </div>
+      {/* ============================================ A and B, the poles */}
+      <div className="border-b border-rule bg-cobalt-wash/50 p-6 sm:p-8">
+        <div className="grid gap-8 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
+          <Pole
+            badge="A"
+            label="What you earn now"
+            amountMinor={targets?.current_monthly_minor ?? null}
+            currency={currency}
+            emptyPrompt="Add it"
+            tone="ink"
+            onSave={
+              targets
+                ? (value) => save(value, targets.target_monthly_minor)
+                : undefined
+            }
+          />
 
-        {/* Two ways to close the distance, drawn as two arrows rather than
-            described in a paragraph. The upper one is the product's main
-            promise; the lower one is what is available on a week when no new
-            opportunity appears. Neither carries a figure here - the earn side
-            is counted below, and the keep side deliberately has no total. */}
-        <div aria-hidden="true" className="hidden text-rule-strong sm:block">
-          <div className="flex flex-col gap-1.5 text-[11px] leading-none">
-            <span className="flex items-center gap-1.5">
-              <span className="text-lg">↗</span>
-              <span className="text-ink-faint">earn</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-lg">↘</span>
-              <span className="text-ink-faint">
-                {leakCount === null ? "keep" : `keep · ${leakCount} to check`}
-              </span>
-            </span>
+          <div
+            aria-hidden="true"
+            className="hidden justify-self-center text-3xl text-cobalt/40 sm:block"
+          >
+            →
           </div>
+
+          <Pole
+            badge="B"
+            label="What you want to earn"
+            amountMinor={targets?.target_monthly_minor ?? null}
+            currency={currency}
+            emptyPrompt="Set it"
+            tone="cobalt"
+            align="right"
+            onSave={
+              targets
+                ? (value) => save(targets.current_monthly_minor, value)
+                : undefined
+            }
+          />
         </div>
 
-        <div className="sm:text-right">
-          <p className="eyebrow mb-1.5 sm:justify-end">
-            <span className="mr-1.5 inline-block rounded-[3px] bg-cobalt px-1.5 py-px font-mono text-[10px] text-paper">
-              B
+        {/* The gap is the product's whole reason for existing, so it is stated
+            once and plainly rather than left for the reader to subtract. */}
+        {targets?.target_reached ? (
+          <p className="mt-7 border-t border-cobalt/15 pt-5 text-center text-sm text-ink-muted">
+            You are already earning at or above your target. Your figure is kept
+            as you set it — raise B if you want this product to look for more.
+          </p>
+        ) : targets && targets.additional_needed_minor > 0 ? (
+          <p className="mt-7 border-t border-cobalt/15 pt-5 text-center text-sm">
+            <span className="text-ink-muted">The distance is </span>
+            <span className="tnum font-semibold">
+              {formatMinor(targets.additional_needed_minor, currency)} a month
             </span>
-            Where you want to be
+            <span className="text-ink-muted">
+              . That is what this product is for.
+            </span>
           </p>
-          <p className="tnum text-3xl leading-none text-cobalt sm:text-4xl">
-            {goal === null ? "Not set" : `${formatMinor(goal, map.currency)}`}
-          </p>
-          <p className="mt-1.5 text-xs text-ink-faint">
-            {goal === null ? (
-              <>
-                <Link
-                  href="/profile"
-                  className="text-cobalt underline underline-offset-4"
-                >
-                  Set a monthly goal
-                </Link>{" "}
-                to see the distance
-              </>
-            ) : (
-              "per month, additional income"
-            )}
-          </p>
-        </div>
+        ) : null}
       </div>
 
-      {/* ------------------------------------------------------- the pipeline */}
+      {/* ================================================ the two directions */}
+      <div className="grid gap-px border-b border-rule bg-rule sm:grid-cols-2">
+        <DirectionBlock
+          arrow="↗"
+          title="Earn more"
+          href="/opportunities"
+          cta="See the opportunities"
+          primary
+          lines={[
+            `${opportunityCount} opportunit${opportunityCount === 1 ? "y" : "ies"} matched to your profile`,
+            potentialMonthly > 0
+              ? `${formatMinor(potentialMonthly, currency)}/month of recurring potential — none of it agreed`
+              : "No recurring potential with a published figure yet",
+          ]}
+        />
+        <DirectionBlock
+          arrow="↘"
+          title="Keep more"
+          href="/personal"
+          cta="Open your money"
+          lines={[
+            leakCount === null
+              ? "Costs, allowances and limits worth checking"
+              : `${leakCount} thing${leakCount === 1 ? "" : "s"} worth checking, raised from what you told us`,
+            "Recorded and cited — never a calculated saving",
+          ]}
+        />
+      </div>
+
+      {/* ==================================================== the pipeline */}
       <div className="p-5 sm:p-6">
+        <p className="eyebrow mb-4">How the earning side is going</p>
         <ol className="grid grid-cols-5 gap-1 sm:gap-2">
           {stages.map((stage, index) => {
             const filled = stage.count > 0;
-            const reached = index <= lastCommittedIndex;
             const isOpen = open === stage.id;
             return (
               <li key={stage.id} className="relative">
-                {/* The rail segment leading into this node. Drawn behind the
-                    node so the node always sits on top of the join. */}
                 {index > 0 ? (
                   <span
                     aria-hidden="true"
                     className={
                       "absolute top-[11px] right-1/2 left-0 h-px " +
-                      (reached ? "bg-rule-strong" : "bg-rule")
+                      (index <= lastCommittedIndex
+                        ? "bg-rule-strong"
+                        : "bg-rule")
                     }
                   />
                 ) : null}
@@ -294,7 +338,6 @@ export function MoneyJourney({
           })}
         </ol>
 
-        {/* --------------------------------------------- the selected stage */}
         <div id="money-journey-detail" className="mt-4">
           {openStage ? (
             <div className="rounded-[4px] border border-rule bg-paper-sunk p-4">
@@ -338,10 +381,10 @@ export function MoneyJourney({
         </div>
       </div>
 
-      {/* ------------------------------------------------------- the two rails */}
+      {/* ====================================================== the rails */}
       <div className="border-t border-rule bg-paper-sunk p-5 sm:p-6">
         <div className="mb-1.5 flex items-baseline justify-between text-sm">
-          <span className="text-ink-muted">Distance from A to B</span>
+          <span className="text-ink-muted">Progress towards B</span>
           <span className="tnum font-medium">
             {ratio === null ? "—" : `${percent}%`}
           </span>
@@ -359,16 +402,10 @@ export function MoneyJourney({
             style={{ width: `${percent}%` }}
           />
         </div>
-        {/* The one sentence that keeps this graphic honest. It lives in
-            `copy` and is rendered exactly once on the page - the dashboard
-            card used to carry its own progress bar and explainer, and two
-            copies of a promise is one copy too many. */}
         <p className="mt-2 text-xs text-ink-faint">
           {copy.money.progressExplainer}
         </p>
 
-        {/* The hypothetical. Separate track, dashed, muted, and captioned - so
-            that it can be read as ambition without being mistaken for money. */}
         {potentialPercent > 0 ? (
           <div className="mt-4 border-t border-rule pt-4">
             <div className="mb-1.5 flex items-baseline justify-between text-sm">
@@ -388,9 +425,8 @@ export function MoneyJourney({
             </div>
             <p className="mt-2 text-xs text-ink-faint">
               Hypothetical, and not counted anywhere else on this page.
-              Recurring potential of{" "}
-              {formatMinor(potentialMonthly, map.currency)}/month across{" "}
-              {map.summary.recurring_potential_count} opportunit
+              Recurring potential of {formatMinor(potentialMonthly, currency)}
+              /month across {map.summary.recurring_potential_count} opportunit
               {map.summary.recurring_potential_count === 1 ? "y" : "ies"} — none
               of it agreed, none of it paid.
             </p>
@@ -398,5 +434,169 @@ export function MoneyJourney({
         ) : null}
       </div>
     </section>
+  );
+}
+
+/** One end of the journey. Click the figure to change it. */
+function Pole({
+  badge,
+  label,
+  amountMinor,
+  currency,
+  emptyPrompt,
+  tone,
+  align = "left",
+  onSave,
+}: {
+  badge: string;
+  label: string;
+  amountMinor: number | null;
+  currency: string;
+  emptyPrompt: string;
+  tone: "ink" | "cobalt";
+  align?: "left" | "right";
+  onSave?: (valueMinor: number) => Promise<void>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const right = align === "right";
+  const isSet = amountMinor !== null && amountMinor > 0;
+
+  async function commit() {
+    const parsed = parseMoneyInput(draft);
+    if (parsed === null || !onSave) {
+      setEditing(false);
+      return;
+    }
+    setBusy(true);
+    try {
+      await onSave(parsed);
+      setEditing(false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className={right ? "sm:text-right" : undefined}>
+      <p className={"eyebrow mb-2 " + (right ? "sm:justify-end" : "")}>
+        <span
+          className={
+            "mr-1.5 inline-block rounded-[3px] px-1.5 py-px font-mono text-[10px] text-paper " +
+            (tone === "cobalt" ? "bg-cobalt" : "bg-ink")
+          }
+        >
+          {badge}
+        </span>
+        {label}
+      </p>
+
+      {editing ? (
+        <div
+          className={
+            "flex items-center gap-1.5 " + (right ? "sm:justify-end" : "")
+          }
+        >
+          <span className="text-3xl text-ink-faint sm:text-4xl">€</span>
+          <input
+            autoFocus
+            inputMode="decimal"
+            value={draft}
+            disabled={busy}
+            aria-label={label}
+            onChange={(event) => setDraft(event.target.value)}
+            onBlur={() => void commit()}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") void commit();
+              if (event.key === "Escape") setEditing(false);
+            }}
+            className="tnum w-40 border-b-2 border-cobalt bg-transparent text-4xl leading-none font-semibold outline-none sm:text-5xl"
+          />
+        </div>
+      ) : (
+        <button
+          type="button"
+          disabled={!onSave}
+          onClick={() => {
+            setDraft(isSet ? String(Math.round((amountMinor ?? 0) / 100)) : "");
+            setEditing(true);
+          }}
+          className={
+            "group flex items-baseline gap-2 rounded-[4px] outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cobalt " +
+            (right ? "sm:ml-auto" : "")
+          }
+        >
+          <span
+            className={
+              "tnum text-4xl leading-none font-semibold sm:text-5xl " +
+              (tone === "cobalt" ? "text-cobalt" : "text-ink")
+            }
+          >
+            {isSet ? formatMinor(amountMinor, currency) : emptyPrompt}
+          </span>
+          {onSave ? (
+            <span
+              aria-hidden="true"
+              className="text-xs text-ink-faint opacity-60 transition-opacity group-hover:opacity-100"
+            >
+              edit
+            </span>
+          ) : null}
+        </button>
+      )}
+
+      <p className="mt-2 text-xs text-ink-faint">
+        {isSet ? "per month" : "click to set it"}
+      </p>
+    </div>
+  );
+}
+
+/** One of the two ways to close the distance. */
+function DirectionBlock({
+  arrow,
+  title,
+  lines,
+  href,
+  cta,
+  primary = false,
+}: {
+  arrow: string;
+  title: string;
+  lines: string[];
+  href: string;
+  cta: string;
+  primary?: boolean;
+}) {
+  return (
+    <div className="bg-paper-raised p-5 sm:p-6">
+      <p className="mb-2.5 flex items-center gap-2">
+        <span
+          aria-hidden="true"
+          className={
+            "text-2xl leading-none " +
+            (primary ? "text-cobalt" : "text-ink-muted")
+          }
+        >
+          {arrow}
+        </span>
+        <span className="text-lg font-semibold">{title}</span>
+      </p>
+      <ul className="space-y-1">
+        {lines.map((line) => (
+          <li key={line} className="text-sm text-ink-muted">
+            {line}
+          </li>
+        ))}
+      </ul>
+      <Link
+        href={href}
+        className="mt-4 inline-block text-sm text-cobalt underline underline-offset-4"
+      >
+        {cta} →
+      </Link>
+    </div>
   );
 }

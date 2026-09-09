@@ -663,6 +663,35 @@ class LeaksResponse(ApiModel):
     )
 
 
+class TargetsRequest(ApiModel):
+    """The two numbers on the A-to-B band, set together.
+
+    They are sent as a pair on purpose. The profile stores the *additional*
+    income the user is aiming for, but a person thinks in "I earn 2,000 and I
+    want 4,000" - so the endpoint takes both and derives the stored field. Send
+    them separately and raising A would silently raise B too, which is not what
+    anybody means.
+    """
+
+    current_monthly_minor: int = Field(ge=0)
+    target_monthly_minor: int = Field(ge=0)
+
+
+class TargetsDto(ApiModel):
+    current_monthly_minor: int
+    #: What the user said they want, returned exactly as they set it - including
+    #: when it sits at or below what they earn now.
+    target_monthly_minor: int
+    #: The gap the product exists to close. Never negative: a target below the
+    #: current income means there is nothing to find, not that the user should
+    #: earn less.
+    additional_needed_minor: int
+    #: True when the target is at or below the current income. The interface
+    #: says so rather than the API quietly moving the target up to match.
+    target_reached: bool = False
+    currency: str = "EUR"
+
+
 # ============================================================= validation
 
 

@@ -29,6 +29,7 @@ import type {
   ProfileDraftResponse,
   Projection,
   SourceProvenance,
+  Targets,
   TaxAnswer,
   Tokens,
 } from "./types";
@@ -376,6 +377,12 @@ export const api = {
   // --- personal money
   personalOverview: () => request<PersonalOverview>("/api/personal/overview"),
   leaks: () => request<LeaksResponse>("/api/personal/leaks"),
+  targets: () => request<Targets>("/api/personal/targets"),
+  setTargets: (current_monthly_minor: number, target_monthly_minor: number) =>
+    request<Targets>("/api/personal/targets", {
+      method: "PUT",
+      body: { current_monthly_minor, target_monthly_minor },
+    }),
   baselineIncome: () => request<BaselineIncome[]>("/api/personal/income"),
   addBaselineIncome: (entry: Record<string, unknown>) =>
     request<BaselineIncome>("/api/personal/income", {

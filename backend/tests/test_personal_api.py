@@ -16,6 +16,25 @@ def auth_headers(client: TestClient) -> dict[str, str]:
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
+def fresh_headers(client: TestClient, email: str) -> dict[str, str]:
+    """A real, empty account.
+
+    The demo session is deliberately seeded with a money picture so the
+    personal page demonstrates something. Tests about empty-state behaviour
+    need an account that is actually empty, which is what signing up gives.
+    """
+    response = client.post(
+        "/api/auth/signup",
+        json={
+            "email": email,
+            "password": "a-sufficiently-long-password",
+            "accept_privacy": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+
 # --------------------------------------------------------------- access
 
 
@@ -57,7 +76,7 @@ def test_a_recorded_income_keeps_the_basis_it_was_given(client: TestClient) -> N
 
 
 def test_gross_and_net_are_reported_separately_and_never_summed(client: TestClient) -> None:
-    headers = auth_headers(client)
+    headers = fresh_headers(client, "grossnet@example.com")
     client.post(
         "/api/personal/income",
         headers=headers,
@@ -78,7 +97,7 @@ def test_gross_and_net_are_reported_separately_and_never_summed(client: TestClie
 
 
 def test_a_one_off_payment_stays_out_of_the_monthly_totals(client: TestClient) -> None:
-    headers = auth_headers(client)
+    headers = fresh_headers(client, "oneoff@example.com")
     client.post(
         "/api/personal/income",
         headers=headers,
@@ -115,7 +134,7 @@ def test_only_one_income_can_be_primary(client: TestClient) -> None:
 
 
 def test_expenses_are_totalled_without_any_tax_effect(client: TestClient) -> None:
-    headers = auth_headers(client)
+    headers = fresh_headers(client, "expenses@example.com")
     for amount, category in ((12_000, "EQUIPMENT"), (3_500, "TRAVEL")):
         response = client.post(
             "/api/personal/expenses",
@@ -233,7 +252,7 @@ def test_every_cited_fact_carries_a_source_and_a_status(seeded_client: TestClien
 
 
 def test_the_uplift_is_none_without_a_baseline(client: TestClient) -> None:
-    headers = auth_headers(client)
+    headers = fresh_headers(client, "uplift@example.com")
     assert client.get("/api/personal/overview", headers=headers).json()["uplift_ratio"] is None
 
 
@@ -289,7 +308,7 @@ def test_recording_income_raises_the_missing_costs_finding(
     seeded_client: TestClient,
 ) -> None:
     client = seeded_client
-    headers = auth_headers(client)
+    headers = fresh_headers(client, "costs@example.com")
     client.post(
         "/api/personal/income",
         headers=headers,
@@ -313,3 +332,83 @@ def test_a_quoted_ceiling_is_labelled_as_the_statutes_figure(
             # is, and a source backing it.
             assert leak["amount_note"]
             assert leak["fact_ids"]
+
+
+# ------------------------------------------------------- A and B
+
+
+def test_the_band_starts_from_the_profile(client: TestClient) -> None:
+    headers = auth_headers(client)
+    body = client.get("/api/personal/targets", headers=headers).json()
+    # The demo profile earns 2,850 net and wants 1,500 more.
+    assert body["current_monthly_minor"] == 285_000
+    assert body["target_monthly_minor"] == 435_000
+    assert body["additional_needed_minor"] == 150_000
+    assert body["target_reached"] is False
+
+
+def test_raising_what_you_earn_leaves_the_target_alone(client: TestClient) -> None:
+    """The reason A and B are sent as a pair.
+
+    Someone who gets a pay rise has not thereby raised their ambition, and the
+    band must not decide that they have.
+    """
+    headers = auth_headers(client)
+    client.put(
+        "/api/personal/targets",
+        headers=headers,
+        json={"current_monthly_minor": 200_000, "target_monthly_minor": 400_000},
+    )
+    body = client.put(
+        "/api/personal/targets",
+        headers=headers,
+        json={"current_monthly_minor": 250_000, "target_monthly_minor": 400_000},
+    ).json()
+
+    assert body["target_monthly_minor"] == 400_000
+    assert body["additional_needed_minor"] == 150_000
+
+
+def test_a_target_below_the_current_income_is_kept_not_rewritten(
+    client: TestClient,
+) -> None:
+    """The bug this pair of fields exists to prevent.
+
+    Setting a target you have already passed used to silently move the target
+    up to match the income. The product does not restate a user's own figure.
+    """
+    headers = auth_headers(client)
+    body = client.put(
+        "/api/personal/targets",
+        headers=headers,
+        json={"current_monthly_minor": 285_000, "target_monthly_minor": 200_000},
+    ).json()
+
+    assert body["target_monthly_minor"] == 200_000
+    # Nothing to find, but the product does not ask anyone to earn less.
+    assert body["additional_needed_minor"] == 0
+    assert body["target_reached"] is True
+
+    # And it survives a reload rather than being derived away.
+    reread = client.get("/api/personal/targets", headers=headers).json()
+    assert reread["target_monthly_minor"] == 200_000
+
+
+def test_setting_the_band_creates_a_baseline_entry_you_can_recognise(
+    client: TestClient,
+) -> None:
+    headers = auth_headers(client)
+    client.delete(
+        f"/api/personal/income/{client.get('/api/personal/income', headers=headers).json()[0]['id']}",
+        headers=headers,
+    )
+    client.put(
+        "/api/personal/targets",
+        headers=headers,
+        json={"current_monthly_minor": 180_000, "target_monthly_minor": 300_000},
+    )
+    entries = client.get("/api/personal/income", headers=headers).json()
+    assert len(entries) == 1
+    assert entries[0]["amount_minor"] == 180_000
+    # Named, not a mystery row on the personal page.
+    assert entries[0]["label"] == "Current income"
