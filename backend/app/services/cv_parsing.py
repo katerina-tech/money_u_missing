@@ -263,24 +263,3 @@ def _safe_url(raw: str | None) -> str | None:
     if not candidate.startswith(("http://", "https://")):
         return None
     return candidate[:500]
-
-
-def draft_from_text(text: str) -> ProfileDraft:
-    """The no-model path: keep the pasted text for the user to work from.
-
-    Deliberately extracts nothing. A regex CV parser produces confident
-    nonsense - mistaking a company for a job title, a postcode for a year - and
-    the user then has to find and correct each error, which is worse than
-    typing the fields themselves.
-    """
-    return ProfileDraft(
-        general=GeneralInfo(),
-        professional=ProfessionalInfo(),
-        not_found=["everything - automatic extraction is unavailable"],
-        extraction_notes=[
-            "AI-assisted extraction is unavailable, so nothing was filled in "
-            "automatically. Your text is below; please fill in the fields you "
-            "want us to use.",
-            text[:4000],
-        ],
-    )

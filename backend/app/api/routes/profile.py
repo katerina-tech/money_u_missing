@@ -26,7 +26,8 @@ from app.security.uploads import (
     validate_upload,
 )
 from app.services import analytics
-from app.services.cv_parsing import CvParser, CvParsingUnavailableError, draft_from_text
+from app.services.cv_parsing import CvParser, CvParsingUnavailableError
+from app.services.cv_recognition import draft_by_recognition
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/profile", tags=["profile"], dependencies=[Depends(rate_limit)])
@@ -200,13 +201,12 @@ async def upload_cv(
 
     try:
         draft = CvParser(provider, guard).parse(text)
-    except CvParsingUnavailableError as error:
-        # Honest degradation: the file is stored, nothing is faked, and the
-        # user is offered the manual path rather than an empty "we found
-        # nothing in your CV".
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(error)
-        ) from error
+    except CvParsingUnavailableError:
+        # Honest degradation rather than a 503. Recognition finds the skills and
+        # languages this product already knows the names of; it still refuses to
+        # guess roles, dates or years, and the draft says which is which. A 503
+        # here used to lose the recognisable half of a document for no reason.
+        draft = draft_by_recognition(text)
 
     return _draft_response(draft, "upload")
 
@@ -228,9 +228,7 @@ def paste_cv(
     try:
         draft = CvParser(provider, guard).parse(payload.text)
     except CvParsingUnavailableError:
-        # Pasted text needs no file, so the fallback can return something
-        # useful: the text itself, with every field left for the user to fill.
-        return _draft_response(draft_from_text(payload.text), "paste")
+        return _draft_response(draft_by_recognition(payload.text), "paste")
     return _draft_response(draft, "paste")
 
 
