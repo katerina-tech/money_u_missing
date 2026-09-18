@@ -99,6 +99,9 @@ class StatementPreview(BaseModel):
     outgoing_rows: int = 0
     suggested_rows: int = 0
     currency: str = "EUR"
+    #: Present for PDF statements, which print their own balances. CSV and CAMT
+    #: exports do not, so there is nothing to check them against.
+    reconciliation: Reconciliation | None = None
     note: str = (
         "Nothing has been imported. These are the lines your bank recorded; "
         "amounts and dates are exactly as exported. A category is only ever "
@@ -143,7 +146,11 @@ _RULES: tuple[tuple[ExpenseCategory, tuple[str, ...]], ...] = (
     ),
     (
         ExpenseCategory.FEES_AND_CHARGES,
-        ("kontofuehrung", "kontoführung", "kontogebuehr", "entgelt", "ihk", "handelskammer"),
+        # "entgelt" alone is far too broad: it is ordinary German for "fee" and
+        # matched a lost-ticket penalty from the transport authority on a real
+        # statement. Only the compounds that actually mean an account charge.
+        ("kontofuehrungsentgelt", "kontoführungsentgelt", "kontofuehrung",
+         "kontoführung", "kontogebuehr", "kontogebühr", "ihk", "handelskammer"),
     ),
 )
 
@@ -340,6 +347,8 @@ def parse_statement(data: bytes, filename: str = "") -> list[StatementRow]:
     """
     del filename  # deliberately unused; see above
     head = data.lstrip()[:200].lower()
+    if head.startswith(b"%pdf"):
+        return parse_pdf(data)[0]
     if head.startswith(b"<?xml") or b"<document" in head:
         return parse_camt(data)
     return parse_csv(data)
@@ -347,7 +356,11 @@ def parse_statement(data: bytes, filename: str = "") -> list[StatementRow]:
 
 def preview(data: bytes, filename: str) -> StatementPreview:
     """Everything the file contains, with suggestions attached to some of it."""
-    rows = parse_statement(data, filename)
+    reconciliation: Reconciliation | None = None
+    if data.lstrip()[:8].lower().startswith(b"%pdf"):
+        rows, reconciliation = parse_pdf(data)
+    else:
+        rows = parse_statement(data, filename)
     if not rows:
         raise StatementRowError(
             "No booked lines were found in this file. Export it again from your "
@@ -372,4 +385,171 @@ def preview(data: bytes, filename: str) -> StatementPreview:
         outgoing_rows=sum(1 for row in rows if row.is_outgoing),
         suggested_rows=sum(1 for item in suggestions if item.suggested),
         currency=rows[0].currency,
+        reconciliation=reconciliation,
     )
+
+
+# --------------------------------------------------------- PDF statements
+
+#: A booked line starts with a date at the beginning of a line.
+_PDF_DATE = re.compile(r"^(\d{2}\.\d{2}\.\d{4})\s+(.*)$")
+#: ...and ends at a line holding nothing but the amount.
+_PDF_AMOUNT = re.compile(r"^(-?\d{1,3}(?:\.\d{3})*,\d{2})$")
+#: The two balance lines, which are not transactions and must not be read as
+#: any. They are what makes the parse checkable, so they are matched precisely.
+_PDF_OPENING = re.compile(r"Kontostand am .*Auszug Nr\.\s*\d+\s+(-?[\d.]+,\d{2})")
+_PDF_CLOSING = re.compile(r"Kontostand am [\d.]+ um .*?(-?[\d.]+,\d{2})")
+
+#: Page furniture that appears between a date and its amount at a page break.
+#: Dropped from the description; it is the bank's letterhead, not the payment.
+_PDF_NOISE = (
+    "berliner sparkasse",
+    "sparkassen finanzgruppe",
+    "kontoauszug",
+    "seite ",
+    "datum erläuterung betrag",
+    "niederlassung der",
+    "postanschrift",
+    "vors. des aufsichtsrats",
+    "vorstand:",
+    "telefon ",
+    "www.",
+    "blz:",
+    "swift (bic)",
+    "sitz berlin",
+    "amtsgericht",
+    "ust.-ident",
+    "alexanderplatz",
+)
+
+
+class Reconciliation(BaseModel):
+    """Proof that the statement was read completely, or that it was not.
+
+    A layout-based parser can quietly miss a line, and a missing line in
+    somebody's own records is worse than an obvious failure. A statement prints
+    its opening and closing balance, so the arithmetic settles it: opening plus
+    everything read must equal closing. When it does, the user has a reason to
+    trust the list. When it does not, they are told rather than left guessing.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    opening_minor: int | None = None
+    closing_minor: int | None = None
+    parsed_total_minor: int = 0
+    checked: bool = False
+    reconciles: bool = False
+
+    @property
+    def difference_minor(self) -> int | None:
+        if self.opening_minor is None or self.closing_minor is None:
+            return None
+        return self.closing_minor - (self.opening_minor + self.parsed_total_minor)
+
+
+def parse_pdf(data: bytes) -> tuple[list[StatementRow], Reconciliation]:
+    """The PDF a Sparkasse account sends by default.
+
+    Reading a layout is a weaker operation than reading CSV or CAMT, and this
+    module said so by refusing PDFs outright. That was too strong: this layout
+    puts the date at the start of a line and the amount alone on a line, and
+    across three real statements it produced a row count that matched the
+    amount count exactly and totals that reconciled to the cent. The refusal
+    cost the user the format their bank actually hands them.
+
+    So it is read - and checked. The reconciliation comes back with the rows.
+    """
+    from pypdf import PdfReader
+
+    try:
+        reader = PdfReader(io.BytesIO(data))
+        text = "\n".join((page.extract_text() or "") for page in reader.pages)
+    except Exception as error:
+        raise StatementRowError("this PDF could not be read") from error
+
+    lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.splitlines()]
+
+    opening: int | None = None
+    closing: int | None = None
+    rows: list[StatementRow] = []
+    booked: date | None = None
+    description: list[str] = []
+
+    for line in lines:
+        if opening is None and (match := _PDF_OPENING.search(line)):
+            opening = _money_to_minor(match.group(1))
+            continue
+        if match := _PDF_CLOSING.search(line):
+            closing = _money_to_minor(match.group(1))
+            continue
+        if "Kontostand" in line:
+            continue
+
+        if match := _PDF_DATE.match(line):
+            booked = _parse_date(match.group(1))
+            description = [match.group(2).strip()]
+            continue
+
+        if booked is None:
+            continue
+
+        if match := _PDF_AMOUNT.match(line):
+            if len(rows) < MAX_ROWS:
+                joined = " ".join(part for part in description if part).strip()
+                rows.append(
+                    StatementRow(
+                        booked_on=booked,
+                        amount_minor=_money_to_minor(match.group(1)),
+                        counterparty=_pdf_counterparty(joined),
+                        reference=joined[:500],
+                    )
+                )
+            booked = None
+            description = []
+            continue
+
+        lowered = line.lower()
+        if line and not any(noise in lowered for noise in _PDF_NOISE):
+            description.append(line)
+
+    total = sum(row.amount_minor for row in rows)
+    checked = opening is not None and closing is not None
+    return rows, Reconciliation(
+        opening_minor=opening,
+        closing_minor=closing,
+        parsed_total_minor=total,
+        checked=checked,
+        reconciles=checked and opening is not None and opening + total == closing,
+    )
+
+
+#: The transaction type that Sparkasse prints before the counterparty. Stripped
+#: so the name shown to the user is the shop, not the word "Lastschrift".
+_PDF_TYPES = (
+    "LastschriftDebitkarte",
+    "Lastschrift",
+    "Überweisungseingang",
+    "Überweisung",
+    "Dauerauftrag",
+    "Verfügung Geldautomat",
+    "Gutschrift",
+    "Kartenzahlung",
+    "Entgeltabrechnung",
+)
+
+
+def _pdf_counterparty(description: str) -> str | None:
+    """The first meaningful fragment, which is where the payee's name sits.
+
+    Best-effort and deliberately shallow: the user sees the full reference
+    beside it and can correct the label, so a wrong guess here costs a glance
+    rather than a wrong record.
+    """
+    text = description
+    for prefix in _PDF_TYPES:
+        if text.startswith(prefix):
+            text = text[len(prefix) :].strip()
+            break
+    head = re.split(r"[/,]|\s{2,}", text, maxsplit=1)[0].strip()
+    return head[:120] or None

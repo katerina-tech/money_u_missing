@@ -463,11 +463,20 @@ def test_private_spending_is_offered_but_not_suggested(client: TestClient) -> No
     assert "github" in software["reason"]
 
 
-def test_a_pdf_statement_is_refused_with_a_reason(client: TestClient) -> None:
+def test_an_unsupported_file_is_refused_with_a_reason(client: TestClient) -> None:
     headers = fresh_headers(client, "pdfstatement@example.com")
-    response = upload(client, headers, "auszug.pdf", b"%PDF-1.7 not really")
+    response = upload(client, headers, "screenshot.png", b"not a statement")
     assert response.status_code == 400
-    assert "CSV-CAMT" in response.json()["detail"]
+    assert "checked against a balance" in response.json()["detail"]
+
+
+def test_an_unreadable_pdf_fails_rather_than_returning_nothing(
+    client: TestClient,
+) -> None:
+    """A PDF is accepted now, but one that yields no lines is still an error."""
+    headers = fresh_headers(client, "badpdf@example.com")
+    response = upload(client, headers, "auszug.pdf", b"%PDF-1.7 not really a pdf")
+    assert response.status_code == 400
 
 
 def test_only_the_selected_lines_are_recorded(client: TestClient) -> None:

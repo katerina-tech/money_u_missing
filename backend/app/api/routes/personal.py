@@ -521,9 +521,10 @@ def set_targets(
 
 # -------------------------------------------------- bank statement import
 
-#: A statement is text. Refusing anything else keeps a PDF or an image from
-#: reaching a CSV parser, and keeps the upload surface as small as the CV one.
-STATEMENT_SUFFIXES = (".csv", ".xml", ".txt", ".camt")
+#: The formats a Sparkasse account actually produces. PDF is included because
+#: it is what the bank sends by default, and the parser proves what it read by
+#: reconciling against the statement's own opening and closing balance.
+STATEMENT_SUFFIXES = (".csv", ".xml", ".txt", ".camt", ".pdf")
 
 
 @router.post("/statements/preview", response_model=dto.StatementPreviewDto)
@@ -546,9 +547,9 @@ async def preview_statement(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                "Upload the CSV-CAMT or CAMT.053 file your bank exports. "
-                "PDFs of a statement cannot be read reliably enough to put "
-                "numbers in your records."
+                "Upload the statement your bank produced: the PDF it sends, or a "
+                "CSV-CAMT or CAMT.053 export. Screenshots and spreadsheets you "
+                "have edited cannot be checked against a balance."
             ),
         )
 

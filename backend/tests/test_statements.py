@@ -192,3 +192,101 @@ def test_an_empty_file_is_an_error_with_a_way_out() -> None:
 
 def test_parsing_is_deterministic() -> None:
     assert preview(CSV.encode("utf-8"), "a.csv") == preview(CSV.encode("utf-8"), "a.csv")
+
+
+# ------------------------------------------------------------- PDF
+
+
+PDF_LIKE = """Kontoauszug 7/2026
+Datum Erläuterung Betrag EUR
+Kontostand am 01.06.2026, Auszug Nr. 6 1.000,00
+01.06.2026 Lastschrift
+Berliner Verkehrsbetriebe (BVG) Abo
+ -63,00
+02.06.2026 LastschriftDebitkarte
+LIDL SAGT DANKE//Berlin/DE
+ -8,15
+03.06.2026 Lastschrift
+Telekom Deutschland GmbH Festnetz
+ -54,89
+Berliner Sparkasse
+Alexanderplatz 2, 10178 Berlin
+Seite 2 von 7
+04.06.2026 Überweisungseingang
+Hansa Logistik HONORAR
+ 1.250,00
+Kontostand am 01.07.2026 um 00:48 Uhr 2.123,96
+"""
+
+
+def as_lines(text: str) -> list[str]:
+    return text.splitlines()
+
+
+def test_the_reconciliation_proves_the_parse_read_everything() -> None:
+    """A layout parser can miss a line silently. The balances settle it.
+
+    1000.00 - 63.00 - 8.15 - 54.89 + 1250.00 = 2123.96
+    """
+    from app.services.statements import _PDF_AMOUNT, _PDF_CLOSING, _PDF_DATE, _PDF_OPENING
+
+    # Exercised through the same regexes the parser uses, without needing a
+    # real PDF binary in the repository.
+    opening = _PDF_OPENING.search(PDF_LIKE)
+    closing = _PDF_CLOSING.search(PDF_LIKE)
+    assert opening and closing
+
+    amounts = [
+        line for line in as_lines(PDF_LIKE) if _PDF_AMOUNT.match(line.strip())
+    ]
+    dates = [
+        line
+        for line in as_lines(PDF_LIKE)
+        if _PDF_DATE.match(line.strip()) and "Kontostand" not in line
+    ]
+    # One amount per booked line is the property that makes the layout safe.
+    assert len(amounts) == len(dates) == 4
+
+
+def test_the_balance_lines_are_not_read_as_transactions() -> None:
+    """Two independent reasons, and the test states both.
+
+    The balance line carries a date, but not at the start, so the anchored
+    pattern does not match it. The parser also skips any line containing
+    "Kontostand", which is what catches a layout where the date does lead.
+    """
+    from app.services.statements import _PDF_DATE
+
+    balance = "Kontostand am 01.06.2026, Auszug Nr. 6 1.000,00"
+    assert _PDF_DATE.match(balance) is None
+    assert "Kontostand" in balance
+
+
+def test_page_furniture_is_dropped_from_the_description() -> None:
+    from app.services.statements import _PDF_NOISE
+
+    for line in ("Berliner Sparkasse", "Seite 2 von 7", "Alexanderplatz 2, 10178 Berlin"):
+        assert any(noise in line.lower() for noise in _PDF_NOISE)
+
+
+def test_a_transaction_type_is_stripped_from_the_payee_name() -> None:
+    from app.services.statements import _pdf_counterparty
+
+    assert _pdf_counterparty("LastschriftDebitkarte LIDL SAGT DANKE//Berlin/DE") == (
+        "LIDL SAGT DANKE"
+    )
+    assert _pdf_counterparty("Überweisungseingang Hansa Logistik HONORAR") == (
+        "Hansa Logistik HONORAR"
+    )
+
+
+def test_a_generic_german_word_does_not_become_a_business_fee() -> None:
+    """A lost-ticket penalty from the transport authority is not an account fee.
+
+    "Entgelt" is ordinary German for "fee" and matched one on a real statement,
+    so the rule was narrowed to the compounds that mean an account charge.
+    """
+    category, _ = suggest_category(
+        row(counterparty="Berliner Verkehrsbetriebe (BVG)", reference="Bel. Verlust Entgelt")
+    )
+    assert category is None

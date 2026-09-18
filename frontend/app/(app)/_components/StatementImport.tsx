@@ -117,15 +117,15 @@ export function StatementImport({ onImported }: { onImported: () => void }) {
     >
       <Card>
         <p className="mb-4 text-sm text-ink-muted">
-          In Sparkasse online banking, choose <strong>Umsätze</strong> →{" "}
-          <strong>Export</strong> and pick <strong>CSV-CAMT</strong> or{" "}
+          Upload the <strong>PDF</strong> your Sparkasse sends, or export{" "}
+          <strong>Umsätze</strong> → <strong>CSV-CAMT</strong> /{" "}
           <strong>CAMT.053</strong>. Three to twelve months gives the clearest
           picture.
         </p>
 
         <input
           type="file"
-          accept=".csv,.xml,.txt,.camt"
+          accept=".pdf,.csv,.xml,.txt,.camt"
           disabled={busy}
           aria-label="Statement file"
           onChange={(event) => {
@@ -162,6 +162,28 @@ export function StatementImport({ onImported }: { onImported: () => void }) {
               </p>
               <p className="tnum text-sm">{selected} selected</p>
             </div>
+
+            {/* A layout-read PDF can miss a line silently, so the parser checks
+                itself against the statement's own balances and the result is
+                shown rather than assumed. */}
+            {preview.reconciliation?.checked ? (
+              <div className="mb-4">
+                {preview.reconciliation.reconciles ? (
+                  <p className="text-xs text-verified">
+                    ✓ These lines add up exactly to the change between the
+                    opening and closing balance printed on the statement, so
+                    nothing was missed.
+                  </p>
+                ) : (
+                  <Notice tone="warning">
+                    These lines do not add up to the change between the opening
+                    and closing balance on the statement, so some may have been
+                    missed. Check against the original before recording
+                    anything.
+                  </Notice>
+                )}
+              </div>
+            ) : null}
 
             <div className="overflow-x-auto">
               <table className="w-full min-w-[46rem] text-left text-sm">

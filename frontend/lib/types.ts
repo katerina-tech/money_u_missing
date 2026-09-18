@@ -591,12 +591,23 @@ export interface SuggestedExpense {
   reason: string;
 }
 
+export interface Reconciliation {
+  opening_minor: number | null;
+  closing_minor: number | null;
+  parsed_total_minor: number;
+  checked: boolean;
+  /** Opening + everything read equals closing. Proof the parse was complete. */
+  reconciles: boolean;
+}
+
 export interface StatementPreview {
   rows: SuggestedExpense[];
   total_rows: number;
   outgoing_rows: number;
   suggested_rows: number;
   currency: string;
+  /** Present for PDF statements, which print their own balances. */
+  reconciliation: Reconciliation | null;
   note: string;
 }
 
