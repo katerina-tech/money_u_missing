@@ -17,12 +17,13 @@ this boundary and not left to the client:
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api import dto, mappers
-from app.api.deps import current_user, get_db, get_legal_facts, rate_limit
+from app.api.deps import current_user, get_db, get_legal_facts, rate_limit, settings_dep
+from app.config import Settings
 from app.db.models import (
     BaselineIncomeRow,
     ExpenseRow,
@@ -33,14 +34,14 @@ from app.db.models import (
     SavedOpportunity,
     User,
 )
-from app.domain.enums import AmountBasis, CompensationPeriod, IncomeStreamCategory
+from app.domain.enums import AmountBasis, CompensationPeriod, IncomeStreamCategory, Tristate
 from app.domain.finances import (
     BaselineIncome,
     Child,
     DeductibleExpense,
     HouseholdContext,
 )
-from app.services import finances
+from app.services import finances, statements
 from app.services import leaks as leaks_service
 from app.services.legal_facts import LegalFactRepository
 
@@ -516,3 +517,108 @@ def set_targets(
     )
     session.commit()
     return _targets(session, user.id, profile)
+
+
+# -------------------------------------------------- bank statement import
+
+#: A statement is text. Refusing anything else keeps a PDF or an image from
+#: reaching a CSV parser, and keeps the upload surface as small as the CV one.
+STATEMENT_SUFFIXES = (".csv", ".xml", ".txt", ".camt")
+
+
+@router.post("/statements/preview", response_model=dto.StatementPreviewDto)
+async def preview_statement(
+    file: UploadFile = File(...),
+    user: User = Depends(current_user),
+    settings: Settings = Depends(settings_dep),
+) -> dto.StatementPreviewDto:
+    """Read an exported statement and propose what could be recorded.
+
+    Nothing is written. This endpoint exists so the user can see the file's
+    contents, and our suggestions, before anything touches their records - and
+    so that no banking credential is ever involved: they export the file
+    themselves from their own online banking.
+    """
+    del user  # authentication only; the file is not stored against the account
+
+    name = (file.filename or "statement").lower()
+    if not name.endswith(STATEMENT_SUFFIXES):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Upload the CSV-CAMT or CAMT.053 file your bank exports. "
+                "PDFs of a statement cannot be read reliably enough to put "
+                "numbers in your records."
+            ),
+        )
+
+    # Read with a ceiling, like the CV upload: checking the size after reading
+    # the whole stream would mean paying the memory cost before enforcing it.
+    data = await file.read(settings.max_upload_bytes + 1)
+    if len(data) > settings.max_upload_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="That file is larger than we accept. Export a shorter period.",
+        )
+
+    try:
+        result = statements.preview(data, name)
+    except statements.StatementRowError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)
+        ) from error
+
+    return dto.StatementPreviewDto(
+        rows=[
+            dto.SuggestedExpenseDto(
+                row=dto.StatementRowDto(
+                    booked_on=item.row.booked_on,
+                    amount_minor=item.row.amount_minor,
+                    currency=item.row.currency,
+                    counterparty=item.row.counterparty,
+                    reference=item.row.reference,
+                ),
+                suggested=item.suggested,
+                category=item.category,
+                reason=item.reason,
+            )
+            for item in result.rows
+        ],
+        total_rows=result.total_rows,
+        outgoing_rows=result.outgoing_rows,
+        suggested_rows=result.suggested_rows,
+        currency=result.currency,
+        note=result.note,
+    )
+
+
+@router.post("/statements/import", response_model=dto.StatementImportResult)
+def import_statement(
+    payload: dto.StatementImportRequest,
+    user: User = Depends(current_user),
+    session: Session = Depends(get_db),
+) -> dto.StatementImportResult:
+    """Record the lines the user picked, with the categories the user chose.
+
+    The server does not re-read the file and does not decide anything: it takes
+    the list the user confirmed. Amounts arrive positive because an expense is
+    a cost, and the statement's minus sign has already served its purpose in
+    telling the user which lines were money leaving.
+    """
+    for item in payload.items:
+        session.add(
+            ExpenseRow(
+                user_id=user.id,
+                label=item.label,
+                amount_minor=item.amount_minor,
+                category=item.category.value,
+                incurred_on=item.incurred_on,
+                # Imported rather than typed, so the receipt question is open
+                # rather than answered. A bank line is evidence of payment, not
+                # the invoice a Finanzamt would ask for.
+                has_receipt=Tristate.UNKNOWN.value,
+                notes=item.notes,
+            )
+        )
+    session.commit()
+    return dto.StatementImportResult(imported=len(payload.items))

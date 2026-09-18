@@ -692,6 +692,60 @@ class TargetsDto(ApiModel):
     currency: str = "EUR"
 
 
+class StatementRowDto(ApiModel):
+    """One line as the bank recorded it. Nothing here is computed."""
+
+    booked_on: date
+    #: Negative for money leaving the account, exactly as the bank stated it.
+    amount_minor: int
+    currency: str = "EUR"
+    counterparty: str | None = None
+    reference: str = ""
+
+
+class SuggestedExpenseDto(ApiModel):
+    row: StatementRowDto
+    #: False for everything the rules did not recognise - which is most of a
+    #: personal statement, and the correct default.
+    suggested: bool = False
+    category: ExpenseCategory | None = None
+    #: The word that produced the suggestion, so it can be argued with.
+    reason: str = ""
+
+
+class StatementPreviewDto(ApiModel):
+    """What the file contains. Importing is a separate, explicit step."""
+
+    rows: list[SuggestedExpenseDto] = Field(default_factory=list)
+    total_rows: int = 0
+    outgoing_rows: int = 0
+    suggested_rows: int = 0
+    currency: str = "EUR"
+    note: str
+
+
+class StatementImportItem(ApiModel):
+    """One line the user has decided to keep, with the category they chose."""
+
+    label: str = Field(min_length=1, max_length=200)
+    amount_minor: int = Field(ge=0)
+    category: ExpenseCategory = ExpenseCategory.OTHER
+    incurred_on: date
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class StatementImportRequest(ApiModel):
+    items: list[StatementImportItem] = Field(default_factory=list, max_length=500)
+
+
+class StatementImportResult(ApiModel):
+    imported: int = 0
+    note: str = (
+        "Only the lines you selected were recorded, with the categories you chose. "
+        "Nothing else from the file was kept."
+    )
+
+
 # ============================================================= validation
 
 

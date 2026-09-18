@@ -412,3 +412,90 @@ def test_setting_the_band_creates_a_baseline_entry_you_can_recognise(
     assert entries[0]["amount_minor"] == 180_000
     # Named, not a mystery row on the personal page.
     assert entries[0]["label"] == "Current income"
+
+
+# --------------------------------------------- bank statement import
+
+SPARKASSE_CSV = (
+    "Auftragskonto;Buchungstag;Valutadatum;Buchungstext;Verwendungszweck;"
+    "Beguenstigter/Zahlungspflichtiger;Kontonummer/IBAN;BIC (SWIFT-Code);Betrag;Waehrung;Info\n"
+    "DE12;04.09.2026;04.09.2026;LASTSCHRIFT;Monatsbeitrag;GitHub Inc;DE99;XX;-8,00;EUR;Umsatz\n"
+    "DE12;05.09.2026;05.09.2026;LASTSCHRIFT;Wocheneinkauf;REWE Markt;DE98;XX;-62,45;EUR;Umsatz\n"
+    "DE12;06.09.2026;06.09.2026;GUTSCHRIFT;Honorar;Hansa Logistik;DE97;XX;1.250,00;EUR;Umsatz\n"
+)
+
+
+def upload(client: TestClient, headers: dict[str, str], name: str, body: bytes):
+    return client.post(
+        "/api/personal/statements/preview",
+        headers=headers,
+        files={"file": (name, body, "text/csv")},
+    )
+
+
+def test_previewing_a_statement_imports_nothing(client: TestClient) -> None:
+    headers = fresh_headers(client, "statement@example.com")
+    before = client.get("/api/personal/expenses", headers=headers).json()
+
+    body = upload(client, headers, "umsaetze.csv", SPARKASSE_CSV.encode("utf-8")).json()
+    assert body["total_rows"] == 3
+    assert body["outgoing_rows"] == 2
+    assert body["suggested_rows"] == 1
+    assert "Nothing has been imported" in body["note"]
+
+    after = client.get("/api/personal/expenses", headers=headers).json()
+    assert after == before
+
+
+def test_private_spending_is_offered_but_not_suggested(client: TestClient) -> None:
+    """The line that keeps this from filing groceries as a business cost."""
+    headers = fresh_headers(client, "groceries@example.com")
+    rows = upload(client, headers, "umsaetze.csv", SPARKASSE_CSV.encode("utf-8")).json()["rows"]
+
+    groceries = next(r for r in rows if r["row"]["counterparty"] == "REWE Markt")
+    assert groceries["suggested"] is False
+    assert groceries["category"] is None
+
+    software = next(r for r in rows if r["row"]["counterparty"] == "GitHub Inc")
+    assert software["suggested"] is True
+    assert software["category"] == "SOFTWARE_AND_SUBSCRIPTIONS"
+    # A suggestion states what produced it, so it can be argued with.
+    assert "github" in software["reason"]
+
+
+def test_a_pdf_statement_is_refused_with_a_reason(client: TestClient) -> None:
+    headers = fresh_headers(client, "pdfstatement@example.com")
+    response = upload(client, headers, "auszug.pdf", b"%PDF-1.7 not really")
+    assert response.status_code == 400
+    assert "CSV-CAMT" in response.json()["detail"]
+
+
+def test_only_the_selected_lines_are_recorded(client: TestClient) -> None:
+    headers = fresh_headers(client, "import@example.com")
+    response = client.post(
+        "/api/personal/statements/import",
+        headers=headers,
+        json={
+            "items": [
+                {
+                    "label": "GitHub Inc",
+                    "amount_minor": 800,
+                    "category": "SOFTWARE_AND_SUBSCRIPTIONS",
+                    "incurred_on": "2026-09-04",
+                }
+            ]
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["imported"] == 1
+
+    expenses = client.get("/api/personal/expenses", headers=headers).json()
+    assert len(expenses) == 1
+    assert expenses[0]["amount_minor"] == 800
+    # A bank line proves payment, not that an invoice exists, so the receipt
+    # question stays open rather than being answered by the import.
+    assert expenses[0]["has_receipt"] == "UNKNOWN"
+
+
+def test_importing_needs_an_account(client: TestClient) -> None:
+    assert client.post("/api/personal/statements/import", json={"items": []}).status_code == 401
