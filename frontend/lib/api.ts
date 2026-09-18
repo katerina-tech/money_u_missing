@@ -29,6 +29,8 @@ import type {
   ProfileDraftResponse,
   Projection,
   SourceProvenance,
+  StatementImportResult,
+  StatementPreview,
   Targets,
   TaxAnswer,
   Tokens,
@@ -377,6 +379,36 @@ export const api = {
   // --- personal money
   personalOverview: () => request<PersonalOverview>("/api/personal/overview"),
   leaks: () => request<LeaksResponse>("/api/personal/leaks"),
+  async previewStatement(file: File): Promise<StatementPreview> {
+    const form = new FormData();
+    form.append("file", file);
+    const stored = tokens.read();
+    const response = await fetch(
+      `${API_BASE}/api/personal/statements/preview`,
+      {
+        method: "POST",
+        headers: stored.access
+          ? { Authorization: `Bearer ${stored.access}` }
+          : {},
+        body: form,
+      },
+    );
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new ApiError(
+        payload && typeof payload === "object" && "detail" in payload
+          ? String((payload as { detail: unknown }).detail)
+          : "That file could not be read.",
+        response.status,
+      );
+    }
+    return payload as StatementPreview;
+  },
+  importStatement: (items: Record<string, unknown>[]) =>
+    request<StatementImportResult>("/api/personal/statements/import", {
+      method: "POST",
+      body: { items },
+    }),
   targets: () => request<Targets>("/api/personal/targets"),
   setTargets: (current_monthly_minor: number, target_monthly_minor: number) =>
     request<Targets>("/api/personal/targets", {

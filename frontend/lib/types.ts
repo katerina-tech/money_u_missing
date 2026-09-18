@@ -570,3 +570,37 @@ export interface Targets {
   target_reached: boolean;
   currency: string;
 }
+
+// ------------------------------------------------- bank statement import
+
+export interface StatementRow {
+  booked_on: string;
+  /** Negative for money leaving the account, exactly as the bank stated it. */
+  amount_minor: number;
+  currency: string;
+  counterparty: string | null;
+  reference: string;
+}
+
+export interface SuggestedExpense {
+  row: StatementRow;
+  /** False for everything the rules did not recognise — most of a statement. */
+  suggested: boolean;
+  category: ExpenseCategory | null;
+  /** The word that produced the suggestion, so it can be argued with. */
+  reason: string;
+}
+
+export interface StatementPreview {
+  rows: SuggestedExpense[];
+  total_rows: number;
+  outgoing_rows: number;
+  suggested_rows: number;
+  currency: string;
+  note: string;
+}
+
+export interface StatementImportResult {
+  imported: number;
+  note: string;
+}

@@ -34,6 +34,7 @@ import {
   Stat,
   TextInput,
 } from "@/components/ui";
+import { StatementImport } from "../_components/StatementImport";
 import { ApiError, api } from "@/lib/api";
 import { copy } from "@/lib/copy";
 import { formatMinor, parseMoneyInput } from "@/lib/format";
@@ -357,6 +358,12 @@ export default function PersonalPage() {
           onError={setError}
         />
       </Section>
+
+      <StatementImport
+        onImported={() => {
+          void load();
+        }}
+      />
 
       {/* ------------------------------------------ money you may be losing */}
       {leaks && leaks.leaks.length > 0 ? (
